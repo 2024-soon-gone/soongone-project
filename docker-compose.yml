@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  local-db:
+    image: library/mysql:5.7
+    container_name: wemixfi-api-server-container
+    restart: always
+    ports:
+      - 3308:3308 # Host Port:Container Port
+    environment:
+      MYSQL_DATABASE: soongone-bc-db # Database name
+      MYSQL_ROOT_PASSWORD: 1234 # root account PW
+      TZ: Asia/Seoul
+    volumes:
+      - ./db/mysql/data:/var/lib/mysql # DB File location
+      - ./db/mysql/init:/docker-entrypoint-initdb.d # Init SQL file location
