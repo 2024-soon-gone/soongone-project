@@ -7,6 +7,7 @@ import { MintDto } from '../dto/nft-dto';
 import { HttpService } from '@nestjs/axios';
 import { Observable, catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
+import { Readable } from 'stream';
 
 @Injectable()
 export class NftService {
@@ -32,48 +33,53 @@ export class NftService {
     // console.log('ipfsApiJWT form dotenv : ', this.ipfsApiJWT);
   }
 
-  //   async mintNft(mintNftDto: MintDto): Promise<string> {
-  //     try {
-  //       // Call the mint function on your smart contract
-  //       const transaction = await this.contract.mint(mintNftDto.name);
+  async mintNft(mintDto: MintDto, file: Express.Multer.File): Promise<string> {
+    try {
+      const ipfsHash = await this.ipfsUpload(mintDto, file);
+      //   console.log('ipfsHash of NFT Img : ' + ipfsHash);
+      return 'ipfsHash of NFT Img : ' + ipfsHash;
+      // // Call the mint function on your smart contract
+      // const transaction = await this.contract.mint(mintDto.name);
 
-  //       // Wait for the transaction to be mined
-  //       await transaction.wait();
+      // // Wait for the transaction to be mined
+      // await transaction.wait();
 
-  //       return `NFT Minted: ${mintNftDto.name}`;
-  //     } catch (error) {
-  //       throw new HttpException(`Failed to mint NFT: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
-  //     }
-  //   }
+      // return `NFT Minted: ${mintDto.name}`;
+    } catch (error) {
+      throw new HttpException(
+        `Failed to mint NFT: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   async ipfsUpload(
-    from: AddressLike,
-    to: AddressLike,
-    amountIn: BigNumberish,
+    mintDto: MintDto,
+    file: Express.Multer.File,
   ): Promise<string> {
-    const uploadApiUrl = 'https://api.pinata.cloud/pinning/pinJSONToIPFS';
+    const uploadApiUrl = 'https://api.pinata.cloud/pinning/pinFileToIPFS';
+
+    const formData = new FormData();
+    const fileBlob = new Blob([file.buffer]);
+    formData.append('file', fileBlob, file.originalname);
+
+    // Append metadata and options as needed
+    formData.append('pinataMetadata', JSON.stringify({ name: 'nftImg' }));
+    formData.append('pinataOptions', JSON.stringify({ cidVersion: 1 }));
+
     const headers = {
       Authorization: `Bearer ${this.ipfsApiJWT}`,
-      // 'Content-Type': 'application/json',
-    };
-
-    const body = {
-      pinataMetadata: {},
-      pinataOptions: {},
+      // FormData will set the Content-Type header with the boundary
     };
 
     try {
       const pinataResponse = await firstValueFrom(
-        this.httpService
-          .post(uploadApiUrl, body, {
-            headers,
-          })
-          .pipe(
-            catchError((error: AxiosError) => {
-              this.logger.error(error.response.data);
-              throw new Error('Error uploading to IPFS');
-            }),
-          ),
+        this.httpService.post(uploadApiUrl, formData, { headers }).pipe(
+          catchError((error: AxiosError) => {
+            this.logger.error(error.response.data);
+            throw new Error('Error uploading to IPFS');
+          }),
+        ),
       );
 
       const ipfsHash = pinataResponse.data.IpfsHash;

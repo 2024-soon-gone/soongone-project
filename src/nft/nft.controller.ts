@@ -25,10 +25,25 @@ import { MintDto } from 'src/dto/nft-dto';
 export class NftController {
   constructor(private nftService: NftService) {}
 
-  @UseInterceptors(FileInterceptor('file'))
   @Post('mint')
-  uploadFile(@Body() body: MintDto, @UploadedFile() file: Express.Multer.File) {
-    return { body, file };
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @Body() mintDto: MintDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    try {
+      return await this.nftService.mintNft(mintDto, file);
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Error : nft/mint',
+          details: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return { mintDto, file };
   }
 }
 
