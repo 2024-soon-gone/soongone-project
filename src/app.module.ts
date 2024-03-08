@@ -9,23 +9,25 @@ import { DatabaseModule } from './database/database.module';
 import { NftModule } from './nft/nft.module';
 import { TradeModule } from './trade/trade.module';
 import { OnchainModule } from './onchain/onchain.module';
+import { ConfigModule } from './config/config.module';
 
 @Module({
   imports: [
-    SequelizeModule.forRoot({
-      dialect: 'mysql',
-      host: 'localhost',
-      port: 3308,
-      username: 'root',
-      password: '1234',
-      database: 'soongone-bc-db',
-      autoLoadModels: true,
-      synchronize: true,
-    }),
+    // SequelizeModule.forRoot({
+    //   dialect: 'mysql',
+    //   host: 'localhost',
+    //   port: 3308,
+    //   username: 'root',
+    //   password: '1234',
+    //   database: 'soongone-bc-db',
+    //   autoLoadModels: true,
+    //   synchronize: true,
+    // }),
     DatabaseModule,
     NftModule,
     TradeModule,
     OnchainModule,
+    ConfigModule,
   ],
   controllers: [AppController],
   providers: [AppService],
