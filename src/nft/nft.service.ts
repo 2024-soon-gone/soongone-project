@@ -8,6 +8,7 @@ import { HttpService } from '@nestjs/axios';
 import { Observable, catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { Readable } from 'stream';
+import * as dotenv from 'dotenv';
 
 @Injectable()
 export class NftService {
@@ -40,6 +41,7 @@ export class NftService {
       console.log(
         `imgIpfsHash : ${imgIpfsHash} jsonIpfsHash : ${jsonIpfsHash}`,
       );
+
       return 'ipfsHash of NFT Img : ' + imgIpfsHash;
       // // Call the mint function on your smart contract
       // const transaction = await this.contract.mint(mintDto.name);
@@ -60,7 +62,8 @@ export class NftService {
     mintDto: MintDto,
     file: Express.Multer.File,
   ): Promise<string> {
-    const uploadApiUrl = 'https://api.pinata.cloud/pinning/pinFileToIPFS';
+    // const uploadApiUrl = 'https://api.pinata.cloud/pinning/pinFileToIPFS';
+    const uploadApiUrl = process.env.IPFS_API_URL + '/pinning/pinFileToIPFS';
 
     const formData = new FormData();
     const fileBlob = new Blob([file.buffer]);
@@ -94,7 +97,8 @@ export class NftService {
   }
 
   async ipfsJsonUpload(mintDto: MintDto, imgIpfsHash: string): Promise<string> {
-    const uploadApiUrl = 'https://api.pinata.cloud/pinning/pinJSONToIPFS';
+    // const uploadApiUrl = 'https://api.pinata.cloud/pinning/pinJSONToIPFS';
+    const uploadApiUrl = process.env.IPFS_API_URL + '/pinning/pinJSONToIPFS';
 
     const headers = {
       Authorization: `Bearer ${this.ipfsApiJWT}`,

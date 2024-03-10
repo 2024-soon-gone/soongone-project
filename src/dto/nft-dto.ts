@@ -1,12 +1,12 @@
 import { IsString, IsNumber, Min } from 'class-validator';
 
 export class MintDto {
-  @IsString({ message: 'Account address must be a string.' })
+  @IsString({ message: 'accountAddress must be a string.' })
   accountAddress: string;
 
-  @IsString()
+  @IsString({ message: 'name must be a string.' })
   name: string;
 
-  @IsString()
+  @IsString({ message: 'description must be a string.' })
   description: string;
 }

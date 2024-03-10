@@ -7,14 +7,19 @@ dotenv.config(); // dotenv.config({ path: '.env.local' }); In case of .env file 
 @Injectable()
 export class ConfigService {
   public getProvider(): ethers.JsonRpcProvider {
-    const ethTestnetProvider = new ethers.JsonRpcProvider(
-      'https://api.test.wemix.com/',
+    const provider = new ethers.JsonRpcProvider(
+      process.env.NETWORK_ENDPOINT_URL + `/${process.env.INFURA_API_KEY}`,
     );
-    return ethTestnetProvider;
+    return provider;
   }
 
   public getAdminPK() {
     const adminPk = process.env.ADMIN_PRIVATEKEY;
+    return adminPk;
+  }
+
+  public getAdminAddress() {
+    const adminPk = process.env.ADMIN_PUBLICADDRESS;
     return adminPk;
   }
 
