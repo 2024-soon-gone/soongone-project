@@ -12,50 +12,78 @@ import * as dotenv from 'dotenv';
 
 @Injectable()
 export class NftService {
-  private readonly contractAddress;
+  private readonly nftContractAddress;
+  private readonly nftContract;
   private readonly adminPrivatekey;
   private readonly ipfsApiJWT;
   private readonly provider;
   private readonly logger = new Logger(NftService.name);
+  private readonly adminWallet;
 
   // 사용자의 privateKey가 넘어오면 그 때 PK와 Provider로 wallet 생성 후 상호작용
   // NFT Mint의 경우에는 서비스 PK로 민팅 시행
-  //   private readonly wallet = new ethers.Wallet(this.privateKey, this.provider);
-  //   private readonly contract = new ethers.Contract(this.contractAddress, ['function mint(string name)'], this.wallet);
+  // private readonly wallet = new ethers.Wallet(this.adminPrivatekey, this.provider);
+  //   private readonly contract = new ethers.Contract(this.nftContractAddress, ['function mint(string name)'], this.wallet);
 
   constructor(
     private configService: ConfigService,
     private httpService: HttpService,
   ) {
     this.provider = this.configService.getProvider();
+    this.nftContractAddress = this.configService.getNFTContractAddress();
+    this.nftContract = new ethers.Contract(
+      this.nftContractAddress,
+      this.configService.getNFTContractABI(),
+      this.provider,
+    );
     this.adminPrivatekey = this.configService.getAdminPK();
     this.ipfsApiJWT = this.configService.getIpfsJWT();
-    // console.log('Admin PK form dotenv : ', this.adminPrivatekey);
-    // console.log('ipfsApiJWT form dotenv : ', this.ipfsApiJWT);
+    this.adminWallet = new ethers.Wallet(this.adminPrivatekey, this.provider);
   }
 
   async mintNft(mintDto: MintDto, file: Express.Multer.File): Promise<string> {
+    let imgIpfsHash: string;
+    let jsonIpfsHash: string;
+
     try {
-      const imgIpfsHash = await this.ipfsFileUpload(mintDto, file);
-      const jsonIpfsHash = await this.ipfsJsonUpload(mintDto, imgIpfsHash);
-      console.log(
-        `imgIpfsHash : ${imgIpfsHash} jsonIpfsHash : ${jsonIpfsHash}`,
+      imgIpfsHash = await this.ipfsFileUpload(mintDto, file);
+      console.log(`Image IPFS Hash: ${imgIpfsHash}`);
+    } catch (error) {
+      throw new HttpException(
+        `Failed to upload image to IPFS: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
 
-      return 'ipfsHash of NFT Img : ' + imgIpfsHash;
-      // // Call the mint function on your smart contract
-      // const transaction = await this.contract.mint(mintDto.name);
+    try {
+      jsonIpfsHash = await this.ipfsJsonUpload(mintDto, imgIpfsHash);
+      console.log(`JSON IPFS Hash: ${jsonIpfsHash}`);
+    } catch (error) {
+      throw new HttpException(
+        `Failed to upload JSON metadata to IPFS: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
 
-      // // Wait for the transaction to be mined
-      // await transaction.wait();
-
-      // return `NFT Minted: ${mintDto.name}`;
+    // If you need to proceed with minting after successful IPFS uploads
+    try {
+      // Call the mint function on your smart contract
+      const transaction = await this.nftContract
+        .connect(this.adminWallet)
+        .safeMint(mintDto.accountAddress, 11, jsonIpfsHash);
+      // Wait for the transaction to be mined
+      await transaction.wait();
+      console.log(`NFT Minted with metadata: ${jsonIpfsHash}`);
+      return `NFT Minted with metadata IPFS hash: ${jsonIpfsHash}`;
     } catch (error) {
       throw new HttpException(
         `Failed to mint NFT: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+
+    // // For now, just returning the IPFS hash of the uploaded image as a placeholder
+    // return 'IPFS Hash of NFT Image: ' + imgIpfsHash;
   }
 
   async ipfsFileUpload(

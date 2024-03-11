@@ -13,7 +13,7 @@ async function main() {
   // Wait for the contract to be deployed
   //   await token.deployed();
 
-  console.log('Token :', token.target);
+  console.log('Token :', token.target); // token.target == Contract deployed address
 }
 
 main()

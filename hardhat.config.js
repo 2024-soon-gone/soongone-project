@@ -1,7 +1,7 @@
 require('@nomicfoundation/hardhat-toolbox');
 require('dotenv').config();
 
-const INFURA_API_KEY = process.env.INFURA_API_KEY;
+const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID;
 const DEPLOYER_PK = process.env.ADMIN_PRIVATEKEY;
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -14,12 +14,12 @@ module.exports = {
     },
     sepolia: {
       loggingEnabled: true,
-      url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
+      url: `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [DEPLOYER_PK],
     },
     polygon: {
       loggingEnabled: true,
-      url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
+      url: `https://polygon-mumbai.infura.io/v3/${INFURA_PROJECT_ID}`,
       accounts: [DEPLOYER_PK],
     },
     tb: {
