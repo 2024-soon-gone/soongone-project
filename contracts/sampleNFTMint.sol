@@ -7,17 +7,17 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract sampleNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
-    constructor(address initialOwner)
-        ERC721("MyToken", "MTK")
-        Ownable(initialOwner)
-    {}
+    uint256 private _tokenIdCounter; // Simple counter to track token IDs
 
-    function safeMint(address to, uint256 tokenId, string memory uri)
-        public
-        onlyOwner
-    {
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
+    constructor(address deployer) ERC721("MyToken", "MTK") Ownable(deployer) {
+        _tokenIdCounter = 0; // Initialize the counter
+    }
+
+    function safeMint(address to, string memory uri) public onlyOwner {
+        _tokenIdCounter++; // Increment the counter before minting to start from 1
+        uint256 newItemId = _tokenIdCounter; // Use the counter as the new token ID
+        _safeMint(to, newItemId); // Mint the new item
+        _setTokenURI(newItemId, uri); // Set the token URI
     }
 
     // The following functions are overrides required by Solidity.
@@ -39,4 +39,5 @@ contract sampleNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     {
         return super.supportsInterface(interfaceId);
     }
+
 }

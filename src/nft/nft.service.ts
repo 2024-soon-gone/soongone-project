@@ -87,7 +87,7 @@ export class NftService {
       // Call the mint function on your smart contract
       const transaction = await this.nftContract
         .connect(this.adminWallet)
-        .safeMint(mintDto.accountAddress, 100, tokenURI);
+        .safeMint(mintDto.accountAddress, tokenURI);
       // Wait for the transaction to be mined
       await transaction.wait();
       console.log(`NFT Minted with metadata: ${jsonIpfsHash}`);
