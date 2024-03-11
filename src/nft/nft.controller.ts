@@ -8,6 +8,7 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFile,
+  Param,
 } from '@nestjs/common';
 
 import { ethers } from 'ethers';
@@ -44,6 +45,23 @@ export class NftController {
       );
     }
     return { mintDto, file };
+  }
+
+  @Get('tokenURI')
+  async getTokenURI(@Query('tokenId') tokenId: number): Promise<string> {
+    try {
+      const tokenURI = await this.nftService.getTokenURI(tokenId);
+      return tokenURI;
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: `Failed to get tokenURI for token ${tokenId}`,
+          details: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
 

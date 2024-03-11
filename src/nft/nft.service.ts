@@ -41,6 +41,22 @@ export class NftService {
     this.adminWallet = new ethers.Wallet(this.adminPrivatekey, this.provider);
   }
 
+  async getTokenURI(tokenId): Promise<string> {
+    try {
+      const tokenURI = await this.nftContract
+        .connect(this.adminWallet)
+        .tokenURI(tokenId);
+      // Wait for the transaction to be mined
+      // await tokenURI.wait();
+      return tokenURI;
+    } catch (error) {
+      throw new HttpException(
+        `Failed to get tokenURI of ${tokenId} : ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async mintNft(mintDto: MintDto, file: Express.Multer.File): Promise<string> {
     let imgIpfsHash: string;
     let jsonIpfsHash: string;
@@ -67,10 +83,11 @@ export class NftService {
 
     // If you need to proceed with minting after successful IPFS uploads
     try {
+      const tokenURI = 'ipfs://' + jsonIpfsHash;
       // Call the mint function on your smart contract
       const transaction = await this.nftContract
         .connect(this.adminWallet)
-        .safeMint(mintDto.accountAddress, 11, jsonIpfsHash);
+        .safeMint(mintDto.accountAddress, 100, tokenURI);
       // Wait for the transaction to be mined
       await transaction.wait();
       console.log(`NFT Minted with metadata: ${jsonIpfsHash}`);
@@ -136,10 +153,15 @@ export class NftService {
     const body = {
       pinataContent: {
         description: mintDto.description,
-        external_url: 'https://openseacreatures.io/3',
+        external_link: 'https://openseacreatures.io/3',
         image: `ipfs://${imgIpfsHash}`,
         name: mintDto.name,
-        attributes: [],
+        attributes: [
+          {
+            trait_type: 'Base',
+            value: 'Starfish',
+          },
+        ],
       },
       pinataMetadata: {
         name: mintDto.name, // Use the name from mintDto or any other relevant metadata
