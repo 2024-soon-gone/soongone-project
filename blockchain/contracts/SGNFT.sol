@@ -9,10 +9,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract SGNFT is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     uint256 private _tokenIdCounter; // Simple counter to track token IDs
 
-    constructor(address deployer) ERC721("MyToken", "MTK") Ownable(deployer) {
+    constructor(address deployer) ERC721("SoonGonePost", "SGP") Ownable(deployer) {
         _tokenIdCounter = 0; // Initialize the counter
     }
-    
 
     function safeMint(address to, string memory uri) public onlyOwner {
         _tokenIdCounter++; // Increment the counter before minting to start from 1
