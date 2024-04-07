@@ -15,6 +15,16 @@ contract MarketPlace is IERC721Receiver {
         uint256 amountPaymentToken;
         uint256 validTime;
     }
+    // NFT Collection => (NFT ID => Bid[])
     mapping(address => mapping(uint256 => Bid[])) private bids; // Manage with Setter
 
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external pure override returns (bytes4) {
+        // Can add extra logic on ERC721 Received.
+        return this.onERC721Received.selector;
+    }
 }
