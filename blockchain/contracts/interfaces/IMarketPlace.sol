@@ -3,53 +3,13 @@ pragma solidity ^0.8.9;
 
 interface IMarketPlace {
     // Getter returns (contents~), Setter doesnt return
-
-    // Events allow 3 indexed attr
-    // Should choose wisely for which attr to set 'indexed' for
-    // WIP Additional research about 'indexed' usage and 'event'
-    event CreateBid(
-        address indexed nftCollectionAddress,
-        uint256 indexed nftId,
-        address addressPaymentToken,
-        uint256 amountPaymentToken,
-        uint256 validTime,
-        address bidder,
-        uint256 indexed bidId 
-    );
-
-    event CancelBid(
-        address indexed nftCollectionAddress,
-        uint256 indexed nftId,
-        uint256 bidId,
-        address indexed bidder
-    );
-
-    event AcceptBid(
-        address indexed nftCollectionAddress,
-        uint256 indexed nftId,
-        address addressPaymentToken,
-        uint256 amountPaymentToken,
-        uint256 validTime,
-        address bidder,
-        uint256 indexed bidId 
-    );
-
-    event ActivateBidding(
-        address indexed nftCollectionAddress,
-        uint256 indexed nftId
-    );
-
-    event DeactivateBidding(
-        address indexed nftCollectionAddress,
-        uint256 indexed nftId
-    );
-
+    // Structure
     struct Bid {
         address addressNFTCollection;
         uint256 nftId;
         address addressPaymentToken;
         uint256 amountPaymentToken;
-        uint256 validTime;
+        uint256 endTime;
         address bidder;
     }
 
@@ -68,7 +28,6 @@ interface IMarketPlace {
     function acceptBid(
         Bid calldata _bid
     ) external;
-
 
     function activateBidding(
         address _addressNFTCollection,
