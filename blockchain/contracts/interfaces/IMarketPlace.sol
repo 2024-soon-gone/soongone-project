@@ -49,9 +49,9 @@ interface IMarketPlace {
     function getNFTBids(
         address  _addressNFTCollection,
         uint256  _nftId
-    ) external view returns(address); // Returns Bid structure Array
+    ) external view returns(Bid[] memory); // Returns Bid structure Array
 
-    // 계정이(if _addressAccount == 0x0 All Bids) 제안한 Bids를 모두(address == 0x0) 혹은 NFT Collection Address를 매개로
+    // 계정이(if _addressAccount == 0x0 All Bids) 제안한 Bids를 모두(If address == 0x0) 혹은 NFT Collection Address를 매개로
     function getAccountBids(
         address _addressAccount,
         address _addressNFTCollection

@@ -68,7 +68,7 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
         Bid calldata _bid
     ) external override {
 
-        //Check is addresses are valid
+        //Check if addresses are valid
         require(
             isContract(_bid.addressNFTCollection),
             "Invalid NFT Collection contract address"
@@ -128,6 +128,42 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
 
     }
 
+    function cancelBid(
+        address _addressNFTCollection,
+        uint256 _nftId,
+        uint256 _bidId
+    ) external override {
+        require(
+            isContract(_addressNFTCollection),
+            "Invalid NFT Collection contract address"
+        );
+        ERC721 nftContract = ERC721(_addressNFTCollection);
+        require(
+            nftContract.ownerOf(_nftId) != address(0),
+            "NFT ID doesn't exist"
+        );
+        // Check if _bidId is present
+        require(
+            _bidId < bids[_addressNFTCollection][_nftId].length,
+            "bid ID doesn' exist"
+        );
+        // Check if msg.sender == bidder
+        // Later this should be modified if a service can cancel the bid on behalf of original bidder
+        require(
+            msg.sender == bids[_addressNFTCollection][_nftId][_bidId].bidder,
+            "msg.sender is not a bidder of this bid"
+        );
+         
+        delete bids[_addressNFTCollection][_nftId][_bidId];
+        
+    }
+
+    function acceptBid(
+        Bid calldata _bid
+    ) external override {
+
+    }
+
     function activateBidding(
         address _addressNFTCollection,
         uint256 _nftId
@@ -153,7 +189,10 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
         );
         // 
         // *. 심화) 현재 bid가 새로 생기는지 여부 확인 필요
-
+        emit ActivateBidding(
+            _addressNFTCollection,
+            _nftId
+        );
     }
 
     function deactivateBidding(
@@ -181,8 +220,58 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
         );
         // 
         // *. 심화) 현재 bid가 새로 생기는지 여부 확인 필요
-
+        emit DeactivateBidding(
+            _addressNFTCollection,
+            _nftId
+        );
     }
+
+    // 현재 특정 NFT에 Bidding이 가능한지 반환
+    function getNFTActive(
+        address _addressNFTCollection,
+        uint256 _nftId
+    ) external view returns(bool) {
+        require(
+            isContract(_addressNFTCollection),
+            "Invalid NFT Collection contract address"
+        );
+        ERC721 nftContract = ERC721(_addressNFTCollection);
+        require(
+            nftContract.ownerOf(_nftId) != address(0),
+            "NFT ID doesn't exist"
+        );
+        return bidState[_addressNFTCollection][_nftId];
+    }
+
+    // 특정 NFT Collection의 특정 NFT에 제안된 Bid를 Get
+    function getNFTBids(
+        address  _addressNFTCollection,
+        uint256  _nftId
+    ) external view returns(Bid[] memory){ // Returns Bid structure Array
+        require(
+            isContract(_addressNFTCollection),
+            "Invalid NFT Collection contract address"
+        );
+        ERC721 nftContract = ERC721(_addressNFTCollection);
+        require(
+            nftContract.ownerOf(_nftId) != address(0),
+            "NFT ID doesn't exist"
+        );
+        return bids[_addressNFTCollection][_nftId];
+    } 
+
+    //계정이(if _addressAccount == 0x0 All Bids) 제안한 Bids를 모두(address == 0x0) 혹은 NFT Collection Address를 매개로
+    function getAccountBids(
+        address _addressAccount,
+        address _addressNFTCollection
+    ) external view returns(Bid[] memory){
+        Bid[] memory dummyBids = new Bid[](1); // 더미 배열의 크기를 1로 설정
+        // 더미 Bid 구조체 생성
+        Bid memory dummyBid = Bid(address(0), 0, address(0), 0, 0, address(0));
+        dummyBids[0] = dummyBid; // 더미 Bid를 배열에 추가
+
+        return dummyBids;
+    } // Returns Bid structure Array
 
 
     function onERC721Received(
