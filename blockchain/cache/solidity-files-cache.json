@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/seojune/Desktop/grad_project/soongone/blockchain/contracts/SGNFT.sol": {
-      "lastModificationDate": 1711972000791,
-      "contentHash": "b882a3737f5c4aa0a1ae3955f0687094",
+      "lastModificationDate": 1712318745027,
+      "contentHash": "3140197c1ee73ffb7e67641d4da7bba3",
       "sourceName": "contracts/SGNFT.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -1658,6 +1658,85 @@
       ],
       "artifacts": [
         "SoGoUpgradable"
+      ]
+    },
+    "/Users/seojune/Desktop/grad_project/soongone/blockchain/contracts/MarketPlace.sol": {
+      "lastModificationDate": 1715409510428,
+      "contentHash": "549713a9c08f37a67e2f44030fb10405",
+      "sourceName": "contracts/MarketPlace.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "./interfaces/IMarketPlace.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.9"
+      ],
+      "artifacts": [
+        "MarketPlace"
+      ]
+    },
+    "/Users/seojune/Desktop/grad_project/soongone/blockchain/contracts/interfaces/IMarketPlace.sol": {
+      "lastModificationDate": 1715409497867,
+      "contentHash": "44c78676c639ec422d7bfe4d2d4b0558",
+      "sourceName": "contracts/interfaces/IMarketPlace.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.9"
+      ],
+      "artifacts": [
+        "IMarketPlace"
       ]
     }
   }

@@ -26,7 +26,9 @@ interface IMarketPlace {
     ) external;
 
     function acceptBid(
-        Bid calldata _bid
+        address _addressNFTCollection,
+        uint256 _nftId,
+        uint256 _bidId
     ) external;
 
     function activateBidding(
@@ -45,6 +47,12 @@ interface IMarketPlace {
         uint256 _nftId
     ) external view returns(bool);
 
+    function getNFTBidInfo(
+        address _addressNFTCollection,
+        uint256 _nftId,
+        uint256 _bidId
+    ) external view returns(Bid memory);
+
     // 특정 NFT Collection의 특정 NFT에 제안된 Bid를 Get
     function getNFTBids(
         address  _addressNFTCollection,
@@ -55,6 +63,6 @@ interface IMarketPlace {
     function getAccountBids(
         address _addressAccount,
         address _addressNFTCollection
-    ) external view returns(address); // Returns Bid structure Array
+    ) external view returns(Bid[] memory); // Returns Bid structure Array
 
 }
