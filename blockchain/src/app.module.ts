@@ -10,6 +10,7 @@ import { NftModule } from './nft/nft.module';
 import { TradeModule } from './trade/trade.module';
 import { OnchainModule } from './onchain/onchain.module';
 import { ConfigModule } from './config/config.module';
+import { PlatformTokenModule } from './platform-token/platform-token.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ConfigModule } from './config/config.module';
     TradeModule,
     OnchainModule,
     ConfigModule,
+    PlatformTokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],

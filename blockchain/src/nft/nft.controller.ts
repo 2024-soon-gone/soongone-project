@@ -15,12 +15,6 @@ import { ethers } from 'ethers';
 import { NftService } from './nft.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { MintDto } from 'src/dto/nft-dto';
-// import {
-//     AccountSnapshotDto,
-//     DepositAssetDto,
-//     BorrowAssetDto,
-//     LiquidateAssetDto,
-// } from 'src/dto/lend-and-borrow-dto';
 
 @Controller('nft')
 export class NftController {
@@ -44,7 +38,6 @@ export class NftController {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return { mintDto, file };
   }
 
   @Get('tokenURI')

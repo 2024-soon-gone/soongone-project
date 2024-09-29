@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 import * as dotenv from 'dotenv';
 import * as sampleNFTJson from '../../artifacts/contracts/sampleNFTMint.sol/sampleNFT.json';
+import * as platFormTokenJSON from '../../artifacts/contracts/SoGo.sol/SoGo.json';
 dotenv.config(); // dotenv.config({ path: '.env.local' }); In case of .env file locations in not in this current directory
 
 @Injectable()
@@ -16,6 +17,16 @@ export class ConfigService {
     return provider;
   }
 
+  public getAdminPK() {
+    const adminPk = process.env.ADMIN_PRIVATEKEY;
+    return adminPk;
+  }
+
+  public getAdminAddress() {
+    const adminPk = process.env.ADMIN_PUBLICADDRESS;
+    return adminPk;
+  }
+
   public getNFTContractAddress() {
     const address = process.env.NFT_CONTRACT_ADDRESS;
     return address;
@@ -26,14 +37,14 @@ export class ConfigService {
     return abi;
   }
 
-  public getAdminPK() {
-    const adminPk = process.env.ADMIN_PRIVATEKEY;
-    return adminPk;
+  public getTokenContractAddress() {
+    const address = process.env.TOKEN_CONTRACT_ADDRESS;
+    return address;
   }
 
-  public getAdminAddress() {
-    const adminPk = process.env.ADMIN_PUBLICADDRESS;
-    return adminPk;
+  public getTokenContractABI() {
+    const abi = platFormTokenJSON.abi;
+    return abi;
   }
 
   public getIpfsJWT() {
