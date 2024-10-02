@@ -1,8 +1,8 @@
 package org.example.springbootserver.config;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.example.springbootserver.customOAuth2.dto.service.CustomOAuth2UserService;
-import org.example.springbootserver.customOAuth2.dto.service.CustomSuccessHandler;
+import org.example.springbootserver.customOAuth2.service.CustomOAuth2UserService;
+import org.example.springbootserver.customOAuth2.service.CustomSuccessHandler;
 import org.example.springbootserver.jwt.JWTFilter;
 import org.example.springbootserver.jwt.JWTUtil;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -82,17 +81,17 @@ public class SecurityConfig {
 //                .addFilterAfter(new JWTFilter(jwtUtil), OAuth2LoginAuthenticationFilter.class);
 
         //oauth2
-        http
-                .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService))
-                        .successHandler(customSuccessHandler)
-                );
+//        http
+//                .oauth2Login((oauth2) -> oauth2
+//                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+//                                .userService(customOAuth2UserService))
+//                        .successHandler(customSuccessHandler)
+//                );
 
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/","/oauth2Verify").permitAll()
                         .anyRequest().authenticated());
 
         //세션 설정 : STATELESS
