@@ -1,4 +1,4 @@
-package org.example.springbootserver.customOAuth2.dto.service;
+package org.example.springbootserver.customOAuth2.service;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
