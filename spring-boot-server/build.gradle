@@ -21,6 +21,7 @@ configurations {
 
 repositories {
 	mavenCentral()
+	google()
 }
 
 dependencies {
@@ -40,6 +41,9 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+	// Googe Api Client
+	implementation 'com.google.api-client:google-api-client:1.33.0'
 }
 
 tasks.named('test') {
