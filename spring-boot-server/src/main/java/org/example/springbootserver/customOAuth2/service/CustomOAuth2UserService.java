@@ -1,4 +1,4 @@
-package org.example.springbootserver.customOAuth2.dto.service;
+package org.example.springbootserver.customOAuth2.service;
 
 
 import org.example.springbootserver.customOAuth2.dto.*;
@@ -38,6 +38,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             return null;
         }
+
+//        System.out.println("OAUTH2 Response :  " + oAuth2User.getAttributes());
 
         //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만듬
         String username = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
