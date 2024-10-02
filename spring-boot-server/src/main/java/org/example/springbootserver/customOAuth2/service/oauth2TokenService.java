@@ -112,8 +112,11 @@ public class oauth2TokenService {
         String jwtToken = jwtUtil.createJwt(username, "ROLE_USER", 60*60*60L); // 3번째 인자는 JWT의 수명
 
         response.addCookie(createCookie("Authorization", jwtToken));
+
+        // No need for redirection when handling Mobile App redirection
 //        response.sendRedirect("http://localhost:3000/"); => 3000번 안열어놨기에 아래의 8080으로 세팅
-        response.sendRedirect("http://localhost:8080/");
+//        response.sendRedirect("http://localhost:8080/");
+//        return response;
     }
 
     private Cookie createCookie(String key, String value) {
