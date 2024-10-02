@@ -22,7 +22,6 @@ public class oauth2TokenController {
     @GetMapping("/oauth2Verify")
     @ResponseBody
     public String verifyUser(@RequestParam("provider") String provider, @RequestParam("accessToken") String accessToken,HttpServletResponse response) throws IOException {
-//        HttpServletResponse response = null;
         CustomOAuth2User customOAuth2User = oauth2TokenService.verifyAccessToken(provider, accessToken);
         if (customOAuth2User == null) {
             return "oauth2 verify failed : oAuth2User is null";

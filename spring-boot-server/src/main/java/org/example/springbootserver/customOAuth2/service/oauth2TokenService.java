@@ -119,7 +119,6 @@ public class oauth2TokenService {
 //        return response;
     }
 
-
     private Cookie createCookie(String key, String value) {
 
         Cookie cookie = new Cookie(key, value);
