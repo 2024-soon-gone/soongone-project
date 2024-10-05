@@ -2,6 +2,12 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Button, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Home from '../assets/icon/home';
+import Search from '../assets/icon/search';
+import Plus from '../assets/icon/plus-outline';
+import Deal from '../assets/icon/deal';
+import Person from '../assets/icon/person';
+import theme from '../assets/Theme';
 
 const Tab = createBottomTabNavigator();
 
@@ -11,8 +17,9 @@ function Main() {
       initialRouteName="Home"
       screenOptions={{
         // tabBarActiveTintColor: "#fb8c00",
-        tabBarActiveTintColor: 'red',
-        tabBarShowLabel: false,
+        tabBarActiveTintColor: theme.black,
+        tabBarInactiveTintColor: theme.grey3,
+        tabBarShowLabel: true,
         headerShown: false,
       }}
     >
@@ -22,7 +29,7 @@ function Main() {
         options={{
           title: '홈',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="home" color={color} size={size} />
+            <Home stroke={color} strokeWidth="2" strokeLinejoin="round" />
           ),
         }}
       />
@@ -32,7 +39,7 @@ function Main() {
         options={{
           title: '검색',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="search" color={color} size={size} />
+            <Search stroke={color} strokeWidth="2" strokeLinejoin="round" />
           ),
         }}
       />
@@ -42,7 +49,7 @@ function Main() {
         options={{
           title: '촬영',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="camera" color={color} size={size} />
+            <Plus stroke={color} strokeWidth="2" strokeLinejoin="round" />
           ),
         }}
       />
@@ -52,7 +59,7 @@ function Main() {
         options={{
           title: '거래',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="handshake" color={color} size={size} />
+            <Deal stroke={color} strokeWidth="2" strokeLinejoin="round" />
           ),
         }}
       />
@@ -62,7 +69,7 @@ function Main() {
         options={{
           title: '프로필',
           tabBarIcon: ({ color, size }) => (
-            <Icon name="person" color={color} size={size} />
+            <Person stroke={color} strokeWidth="2" strokeLinejoin="round" />
           ),
         }}
       />
