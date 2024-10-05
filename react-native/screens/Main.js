@@ -9,13 +9,14 @@ import Deal from '../assets/icon/deal';
 import Person from '../assets/icon/person';
 import theme from '../assets/Theme';
 import HomeScreen from './Home/Home';
+import SearchScreen from './Search/Search';
 
 const Tab = createBottomTabNavigator();
 
 function Main() {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Search"
       screenOptions={{
         tabBarActiveTintColor: theme.black,
         tabBarInactiveTintColor: theme.grey3,
@@ -87,10 +88,6 @@ function Main() {
       />
     </Tab.Navigator>
   );
-}
-
-function SearchScreen() {
-  return <Text>Search</Text>;
 }
 
 function CameraScreen() {
