@@ -8,6 +8,7 @@ import Plus from '../assets/icon/plus-outline';
 import Deal from '../assets/icon/deal';
 import Person from '../assets/icon/person';
 import theme from '../assets/Theme';
+import HomeScreen from './Home/Home';
 
 const Tab = createBottomTabNavigator();
 
@@ -86,9 +87,6 @@ function Main() {
       />
     </Tab.Navigator>
   );
-}
-function HomeScreen({ navigation }) {
-  return <Text>Home</Text>;
 }
 
 function SearchScreen() {
