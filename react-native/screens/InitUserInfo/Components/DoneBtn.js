@@ -1,11 +1,11 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import theme from '../../../assets/Theme';
-function SkipButton({ onPress }) {
+function DoneButton({ onPress }) {
   return (
     <Pressable>
       <Text style={styles.button} onPress={onPress}>
-        건너뛰기
+        완료
       </Text>
     </Pressable>
   );
@@ -20,8 +20,8 @@ const styles = StyleSheet.create({
     borderRadius: '8px',
     color: theme.white,
     fontSize: '12px',
-    backgroundColor: theme.blue2,
+    backgroundColor: theme.black,
   },
 });
 
-export default SkipButton;
+export default DoneButton;
