@@ -16,11 +16,22 @@ function Main() {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
-        // tabBarActiveTintColor: "#fb8c00",
         tabBarActiveTintColor: theme.black,
         tabBarInactiveTintColor: theme.grey3,
         tabBarShowLabel: true,
         headerShown: false,
+        tabBarStyle: {
+          paddingBottom: '12px',
+          height: '83px',
+        },
+        tabBarItemStyle: {
+          height: '49px',
+          paddingTop: '7px',
+          bottom: 0,
+        },
+        tabBarIconStyle: {
+          marginBottom: '3.87px',
+        },
       }}
     >
       <Tab.Screen
@@ -47,7 +58,7 @@ function Main() {
         name="Camera"
         component={CameraScreen}
         options={{
-          title: '촬영',
+          title: '추가하기',
           tabBarIcon: ({ color, size }) => (
             <Plus stroke={color} strokeWidth="2" strokeLinejoin="round" />
           ),
@@ -67,7 +78,7 @@ function Main() {
         name="Profile"
         component={ProfileScreen}
         options={{
-          title: '프로필',
+          title: '마이페이지',
           tabBarIcon: ({ color, size }) => (
             <Person stroke={color} strokeWidth="2" strokeLinejoin="round" />
           ),
