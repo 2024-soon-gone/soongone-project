@@ -73,8 +73,8 @@ public class SecurityConfig {
 //                .oauth2Login(Customizer.withDefaults());
 
         //JWTFilter 추가
-        http
-                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+//        http
+//                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         //JWTFilter 추가 in case of Infinite Redirection
 //        http
