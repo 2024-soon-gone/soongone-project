@@ -6,7 +6,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootserver.customOAuth2.dto.*;
-import org.example.springbootserver.user.entity.OAuthUserEntity;
 import org.example.springbootserver.user.entity.UserEntity;
 import org.example.springbootserver.user.repository.OAuthUserRepository;
 import org.example.springbootserver.user.repository.UserRepository;
@@ -70,23 +69,12 @@ public class oauth2TokenService {
         }
 
         //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만듬
-        String username = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
+        String sociaUserIdenfier = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
 
         // UserName(Unique한 식별자)을 통해 사용자의 정보 존재 여부를 Jpa를 통해 확인한다.
-//        UserEntity existData = userRepository.findByUsername(username);
-        OAuthUserEntity existData = oAuthUserRepository.findByUsername(username);
+        UserEntity existData = userRepository.findBySocialUserIdentifier(sociaUserIdenfier);
 
         if (existData == null) { // 기존 유저가 존재하지 않는다면
-
-
-            // Test for Oauth
-            OAuthUserEntity OAuthUserEntity = new OAuthUserEntity();
-            OAuthUserEntity.setUsername(username);
-            OAuthUserEntity.setEmail(oAuth2Response.getEmail());
-            OAuthUserEntity.setName(oAuth2Response.getName());
-            OAuthUserEntity.setRole("ROLE_USER");
-
-            oAuthUserRepository.save(OAuthUserEntity);
 
             // User
             UserEntity userEntity = new UserEntity();
@@ -95,23 +83,17 @@ public class oauth2TokenService {
 
 
             UserDTO userDTO = new UserDTO();
-            userDTO.setUsername(username);
+            userDTO.setSocialUserIdentifier(sociaUserIdenfier);
             userDTO.setName(oAuth2Response.getName());
             userDTO.setRole("ROLE_USER");
-
-
 
             return new CustomOAuth2User(userDTO);
         }
         else{ // 기존 유저가 존재한다면
-            existData.setEmail(oAuth2Response.getEmail());
-            existData.setName(oAuth2Response.getName());
-
-            // 소셜 프로필 정보가 변경됐다면 해당 정보를 update
-            oAuthUserRepository.save(existData);
+            updateUser(existData, oAuth2Response);
 
             UserDTO userDTO = new UserDTO();
-            userDTO.setUsername(existData.getUsername());
+            userDTO.setSocialUserIdentifier(sociaUserIdenfier);
             userDTO.setName(oAuth2Response.getName());
             userDTO.setRole(existData.getRole());
 
@@ -120,15 +102,12 @@ public class oauth2TokenService {
     }
 
     public void onTokenVerificationSuccess(HttpServletResponse response, CustomOAuth2User customOAuth2User) throws IOException {
-        String username = customOAuth2User.getUsername();
-        String jwtToken = jwtUtil.createJwt(username, "ROLE_USER", 60*60*60L); // 3번째 인자는 JWT의 수명
+        String socialUserIdentifier = customOAuth2User.getSocialUserIdentifier();
+        String jwtToken = jwtUtil.createJwt(socialUserIdentifier, "ROLE_USER", 60*60*60L); // 3번째 인자는 JWT의 수명
 
         response.addCookie(createCookie("Authorization", jwtToken));
 
         // No need for redirection when handling Mobile App redirection
-//        response.sendRedirect("http://localhost:3000/"); => 3000번 안열어놨기에 아래의 8080으로 세팅
-//        response.sendRedirect("http://localhost:8080/");
-//        return response;
     }
 
     private Cookie createCookie(String key, String value) {
@@ -154,4 +133,9 @@ public class oauth2TokenService {
         return userEntity;
     }
 
+    private void updateUser(UserEntity existData, OAuth2Response oAuth2Response) {
+        existData.setEmail(oAuth2Response.getEmail());
+        existData.setName(oAuth2Response.getName());
+        userRepository.save(existData);
+    }
 }

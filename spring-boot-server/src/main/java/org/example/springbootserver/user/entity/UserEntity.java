@@ -10,11 +10,11 @@ import java.util.Date;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @ToString(callSuper = true)
-//@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 //@Builder
 @Entity
 @Data
-public class UserEntity {
+public class UserEntity extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
