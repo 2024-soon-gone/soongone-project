@@ -22,11 +22,11 @@ public class oauth2TokenController {
     @GetMapping("/oauth2Verify")
     @ResponseBody
     public String verifyUser(@RequestParam("provider") String provider, @RequestParam("accessToken") String accessToken,HttpServletResponse response) throws IOException {
+
         CustomOAuth2User customOAuth2User = oauth2TokenService.verifyAccessToken(provider, accessToken);
         if (customOAuth2User == null) {
             return "oauth2 verify failed : oAuth2User is null";
         }
-        // Return the response body (user info) or handle error
         // Return the response body (user info) or handle error
         try {
             // Call the method to process the successful verification
@@ -37,5 +37,6 @@ public class oauth2TokenController {
             System.out.println("onTokenVerificationSuccess exception: " + e);
             return "OAuth2 verification process failed due to an internal error.";
         }
+
     }
 }

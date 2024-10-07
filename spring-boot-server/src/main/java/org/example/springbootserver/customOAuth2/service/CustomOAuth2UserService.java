@@ -1,9 +1,10 @@
 package org.example.springbootserver.customOAuth2.service;
 
 
+import lombok.RequiredArgsConstructor;
 import org.example.springbootserver.customOAuth2.dto.*;
-import org.example.springbootserver.user.entity.UserEntity;
-import org.example.springbootserver.user.repository.UserRepository;
+import org.example.springbootserver.user.entity.OAuthUserEntity;
+import org.example.springbootserver.user.repository.OAuthUserRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -11,14 +12,14 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 @Service
-
+@RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final UserRepository userRepository;
+    private final OAuthUserRepository oAuthUserRepository;
 
-    public CustomOAuth2UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+//    public CustomOAuth2UserService(UserRepository userRepository) {
+//        this.userRepository = userRepository;
+//    }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -45,17 +46,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String username = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
 
         // UserName(Unique한 식별자)을 통해 사용자의 정보 존재 여부를 Jpa를 통해 확인한다.
-        UserEntity existData = userRepository.findByUsername(username);
+//        UserEntity existData = userRepository.findByUsername(username);
+        OAuthUserEntity existData = oAuthUserRepository.findByUsername(username);
 
         if (existData == null) { // 기존 유저가 존재하지 않는다면
 
-            UserEntity userEntity = new UserEntity();
-            userEntity.setUsername(username);
-            userEntity.setEmail(oAuth2Response.getEmail());
-            userEntity.setName(oAuth2Response.getName());
-            userEntity.setRole("ROLE_USER");
+            OAuthUserEntity OAuthUserEntity = new OAuthUserEntity();
+            OAuthUserEntity.setUsername(username);
+            OAuthUserEntity.setEmail(oAuth2Response.getEmail());
+            OAuthUserEntity.setName(oAuth2Response.getName());
+            OAuthUserEntity.setRole("ROLE_USER");
 
-            userRepository.save(userEntity);
+//            userRepository.save(OAuthUserEntity);
+            oAuthUserRepository.save(OAuthUserEntity);
 
             UserDTO userDTO = new UserDTO();
             userDTO.setUsername(username);
@@ -68,7 +71,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             existData.setEmail(oAuth2Response.getEmail());
             existData.setName(oAuth2Response.getName());
 
-            userRepository.save(existData);
+//            userRepository.save(existData);
+            oAuthUserRepository.save(existData);
 
             UserDTO userDTO = new UserDTO();
             userDTO.setUsername(existData.getUsername());
