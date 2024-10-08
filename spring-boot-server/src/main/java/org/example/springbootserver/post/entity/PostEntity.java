@@ -12,6 +12,8 @@ import org.example.springbootserver.user.entity.UserEntity;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
+
+@Builder
 public class PostEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +36,7 @@ public class PostEntity extends BaseEntity {
 
     private Long likes;
 
-    private Long comments;
+    private Long commentCounts;
 
     @ManyToOne
     private UserEntity ownerUserId;

@@ -82,22 +82,22 @@ public class oauth2TokenService {
             userRepository.save(userEntity);
 
 
-            UserDTO userDTO = new UserDTO();
-            userDTO.setSocialUserIdentifier(sociaUserIdenfier);
-            userDTO.setName(oAuth2Response.getName());
-            userDTO.setRole("ROLE_USER");
+            Token2OAuthDTO token2OAuthDTO = new Token2OAuthDTO();
+            token2OAuthDTO.setSocialUserIdentifier(sociaUserIdenfier);
+            token2OAuthDTO.setName(oAuth2Response.getName());
+            token2OAuthDTO.setRole("ROLE_USER");
 
-            return new CustomOAuth2User(userDTO);
+            return new CustomOAuth2User(token2OAuthDTO);
         }
         else{ // 기존 유저가 존재한다면
             updateUser(existData, oAuth2Response);
 
-            UserDTO userDTO = new UserDTO();
-            userDTO.setSocialUserIdentifier(sociaUserIdenfier);
-            userDTO.setName(oAuth2Response.getName());
-            userDTO.setRole(existData.getRole());
+            Token2OAuthDTO token2OAuthDTO = new Token2OAuthDTO();
+            token2OAuthDTO.setSocialUserIdentifier(sociaUserIdenfier);
+            token2OAuthDTO.setName(oAuth2Response.getName());
+            token2OAuthDTO.setRole(existData.getRole());
 
-            return new CustomOAuth2User(userDTO);
+            return new CustomOAuth2User(token2OAuthDTO);
         }
     }
 

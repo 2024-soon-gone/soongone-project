@@ -60,12 +60,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 //            userRepository.save(OAuthUserEntity);
             oAuthUserRepository.save(OAuthUserEntity);
 
-            UserDTO userDTO = new UserDTO();
-            userDTO.setSocialUserIdentifier(username);
-            userDTO.setName(oAuth2Response.getName());
-            userDTO.setRole("ROLE_USER");
+            Token2OAuthDTO token2OAuthDTO = new Token2OAuthDTO();
+            token2OAuthDTO.setSocialUserIdentifier(username);
+            token2OAuthDTO.setName(oAuth2Response.getName());
+            token2OAuthDTO.setRole("ROLE_USER");
 
-            return new CustomOAuth2User(userDTO);
+            return new CustomOAuth2User(token2OAuthDTO);
         }
         else{ // 기존 유저가 존재한다면
             existData.setEmail(oAuth2Response.getEmail());
@@ -74,12 +74,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 //            userRepository.save(existData);
             oAuthUserRepository.save(existData);
 
-            UserDTO userDTO = new UserDTO();
-            userDTO.setSocialUserIdentifier(existData.getUsername());
-            userDTO.setName(oAuth2Response.getName());
-            userDTO.setRole(existData.getRole());
+            Token2OAuthDTO token2OAuthDTO = new Token2OAuthDTO();
+            token2OAuthDTO.setSocialUserIdentifier(existData.getUsername());
+            token2OAuthDTO.setName(oAuth2Response.getName());
+            token2OAuthDTO.setRole(existData.getRole());
 
-            return new CustomOAuth2User(userDTO);
+            return new CustomOAuth2User(token2OAuthDTO);
         }
     }
 }

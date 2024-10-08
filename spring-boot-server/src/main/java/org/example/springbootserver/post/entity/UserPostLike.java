@@ -2,10 +2,7 @@ package org.example.springbootserver.post.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.springbootserver.customOAuth2.dto.UserDTO;
 import org.example.springbootserver.user.entity.BaseEntity;
-
-import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor

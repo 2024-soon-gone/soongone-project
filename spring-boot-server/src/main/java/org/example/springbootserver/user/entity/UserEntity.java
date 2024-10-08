@@ -2,9 +2,12 @@ package org.example.springbootserver.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.springbootserver.customOAuth2.dto.UserDTO;
+import org.example.springbootserver.post.entity.CommentEntity;
+import org.example.springbootserver.post.entity.PostEntity;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -48,6 +51,41 @@ public class UserEntity extends BaseEntity{
     private String introduce;
 
     private String profileImg;
+
+//    @OneToMany
+//    @JoinColumn(name = "user_id")
+//    @ToString.Exclude
+//    private List<PostEntity> postsCreated = new ArrayList<>();
+//
+//    @OneToMany
+//    @JoinColumn(name = "user_id")
+//    @ToString.Exclude
+//    private List<PostEntity> postsOwned = new ArrayList<>();
+//
+//    @OneToMany
+//    @JoinColumn(name = "user_id")
+//    @ToString.Exclude
+//    private List<CommentEntity> commentsCreated = new ArrayList<>();
+//
+//    @OneToMany
+//    @JoinColumn(name = "user_id")
+//    @ToString.Exclude
+//    private List<UserEntity> usersFollowing = new ArrayList<>();
+//
+//    @OneToMany
+//    @JoinColumn(name = "user_id")
+//    @ToString.Exclude
+//    private List<UserEntity> usersFollowers = new ArrayList<>();
+//
+//    @OneToMany
+//    @JoinColumn(name = "user_id")
+//    @ToString.Exclude
+//    private List<UserEntity> postsLiked = new ArrayList<>();
+//
+//    @OneToMany
+//    @JoinColumn(name = "user_id")
+//    @ToString.Exclude
+//    private List<UserEntity> commentsLiked = new ArrayList<>();
 }
 
 ;
