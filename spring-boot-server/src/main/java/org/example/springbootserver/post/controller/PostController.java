@@ -37,27 +37,25 @@ public class PostController {
 
     // Get all Posts
     @GetMapping
-    public ResponseEntity<List<PostEntity>> getAllPosts() {
-        List<PostEntity> posts = postService.getAllPosts();
+    public ResponseEntity<List<PostDTO>> getAllPosts() {
+        List<PostDTO> posts = postService.getAllPosts();
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
     // Get a Post by ID
     @GetMapping("/{id}")
-    public ResponseEntity<PostEntity> getPostById(@PathVariable Long id) {
-        Optional<PostEntity> postEntity = postService.getPostById(id);
-        return postEntity
-                .map(post -> new ResponseEntity<>(post, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<PostDTO> getPostById(@PathVariable Long id) {
+        PostDTO postFound = postService.getPostById(id);
+        return new ResponseEntity<>(postFound, HttpStatus.OK);
     }
 
     // Update a Post
     @PutMapping("/{id}")
-    public ResponseEntity<PostEntity> updatePost(
+    public ResponseEntity<PostDTO> updatePost(
             @PathVariable Long id,
-            @RequestBody PostEntity updatedPost) {
+            @RequestBody PostRequestDTO updatedPostRequest) {
         try {
-            PostEntity post = postService.updatePost(id, updatedPost);
+            PostDTO post = postService.updatePost(id, updatedPostRequest);
             return new ResponseEntity<>(post, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

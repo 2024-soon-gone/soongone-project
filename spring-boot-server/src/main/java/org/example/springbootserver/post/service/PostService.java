@@ -49,7 +49,6 @@ public class PostService {
                 .build();
 
         PostEntity post = postRepository.save(postEntity);
-//        return postRepository.save(postEntity);
         return PostDTO.from(post);
     }
 
@@ -68,30 +67,40 @@ public class PostService {
 //    }
 
     // Read all Posts
-    public List<PostEntity> getAllPosts() {
-        return postRepository.findAll();
+    public List<PostDTO> getAllPosts() {
+        List<PostEntity> posts = postRepository.findAll();
+        return posts.stream().map(PostDTO::from).toList();
     }
 
     // Read a Post by ID
-    public Optional<PostEntity> getPostById(Long id) {
-        return postRepository.findById(id);
+    public PostDTO getPostById(Long id) {
+        PostEntity post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
+        return PostDTO.from(post);
     }
+
 
     // Update a Post
-    public PostEntity updatePost(Long id, PostEntity updatedPost) {
-        return postRepository.findById(id)
+    public PostDTO updatePost(Long id, PostRequestDTO updatedPostDTO) {
+        PostEntity updatedPostEntity = postRepository.findById(id)
                 .map(post -> {
-                    post.setText(updatedPost.getText());
-                    post.setLocation(updatedPost.getLocation());
-                    post.setLikes(updatedPost.getLikes());
-                    post.setCommentCounts(updatedPost.getCommentCounts());
-                    post.setOwnerUserId(updatedPost.getOwnerUserId());
+                    post.setText(updatedPostDTO.getText());
+                    post.setLocation(updatedPostDTO.getLocation());
+                    // Add additional fields here if required
                     return postRepository.save(post);
-                }).orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
+
+        return PostDTO.from(updatedPostEntity);
     }
 
+
     // Delete a Post by ID
-    public void deletePost(Long id) {
+    public String deletePost(Long id) {
+        postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
         postRepository.deleteById(id);
+        return "Post deleted successfully";
     }
+
 }
