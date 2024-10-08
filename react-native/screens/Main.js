@@ -11,13 +11,14 @@ import theme from '../assets/Theme';
 import HomeScreen from './Home/Home';
 import SearchScreen from './Search/Search';
 import TranscationScreen from './Transaction/Transaction';
+import ProfileScreen from './Profile/Profile';
 
 const Tab = createBottomTabNavigator();
 
 function Main() {
   return (
     <Tab.Navigator
-      initialRouteName="Transaction"
+      initialRouteName="Profile"
       screenOptions={{
         tabBarActiveTintColor: theme.black,
         tabBarInactiveTintColor: theme.grey3,
@@ -93,10 +94,6 @@ function Main() {
 
 function CameraScreen() {
   return <Text>Camera</Text>;
-}
-
-function ProfileScreen() {
-  return <Text>Profile</Text>;
 }
 
 export default Main;
