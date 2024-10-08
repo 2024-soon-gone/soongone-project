@@ -11,7 +11,7 @@ import java.util.Date;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @ToString(callSuper = true)
-//@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 //@Builder
 @Entity
 @Data
@@ -20,11 +20,13 @@ public class Follow extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
+    @NonNull
     @ManyToOne
+    //    @ManyToOne(fetch = FetchType.LAZY)
     private UserEntity followSrcId;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
+    @NonNull
     @ManyToOne
+    //    @ManyToOne(fetch = FetchType.LAZY)
     private UserEntity followDstId;
 }

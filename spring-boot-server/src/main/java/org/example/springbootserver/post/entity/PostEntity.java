@@ -9,6 +9,7 @@ import org.example.springbootserver.user.entity.UserEntity;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
 public class PostEntity extends BaseEntity {
