@@ -7,23 +7,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootserver.customOAuth2.dto.*;
 import org.example.springbootserver.user.entity.UserEntity;
+import org.example.springbootserver.user.repository.OAuthUserRepository;
 import org.example.springbootserver.user.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.example.springbootserver.jwt.JWTUtil;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class oauth2TokenService {
+
     private final UserRepository userRepository;
+    private final OAuthUserRepository oAuthUserRepository;
     private final JWTUtil jwtUtil;
 
     public CustomOAuth2User verifyAccessToken(String provider, String accessToken) throws OAuth2AuthenticationException {
@@ -35,17 +35,17 @@ public class oauth2TokenService {
         }
         String url;
 
-        if(provider.equals("google")){
+        if ("google".equals(provider)) {
             // Define the Google API URL with the access token
             url = "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + accessToken;
         } else {
-            System.out.println("Provider is not Supported");
-            OAuth2AuthenticationException providerNotSupported = new OAuth2AuthenticationException("Provider is null");
-            throw providerNotSupported;
+            throw new OAuth2AuthenticationException("Provider is not supported");
         }
         // Use RestTemplate to send a GET request to the Google API
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> tokenVerifiedResponse = restTemplate.getForEntity(url, String.class);
+
+        System.out.println("Google Token response header : " + tokenVerifiedResponse.getHeaders());
         System.out.println("Google Token Verified result : " + tokenVerifiedResponse.getBody());
 
         // Parse the response body (JSON) into a Map
@@ -69,51 +69,45 @@ public class oauth2TokenService {
         }
 
         //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만듬
-        String username = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
+        String sociaUserIdenfier = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
 
         // UserName(Unique한 식별자)을 통해 사용자의 정보 존재 여부를 Jpa를 통해 확인한다.
-        UserEntity existData = userRepository.findByUsername(username);
+        UserEntity existData = userRepository.findBySocialUserIdentifier(sociaUserIdenfier);
 
         if (existData == null) { // 기존 유저가 존재하지 않는다면
 
+            // User
             UserEntity userEntity = new UserEntity();
-            userEntity.setUsername(username);
-            userEntity.setEmail(oAuth2Response.getEmail());
-            userEntity.setName(oAuth2Response.getName());
-            userEntity.setRole("ROLE_USER");
-
+            userEntity = createNewUser(oAuth2Response);
             userRepository.save(userEntity);
 
-            UserDTO userDTO = new UserDTO();
-            userDTO.setUsername(username);
-            userDTO.setName(oAuth2Response.getName());
-            userDTO.setRole("ROLE_USER");
 
-            return new CustomOAuth2User(userDTO);
+            Token2OAuthDTO token2OAuthDTO = new Token2OAuthDTO();
+            token2OAuthDTO.setSocialUserIdentifier(sociaUserIdenfier);
+            token2OAuthDTO.setName(oAuth2Response.getName());
+            token2OAuthDTO.setRole("ROLE_USER");
+
+            return new CustomOAuth2User(token2OAuthDTO);
         }
         else{ // 기존 유저가 존재한다면
-            existData.setEmail(oAuth2Response.getEmail());
-            existData.setName(oAuth2Response.getName());
+            updateUser(existData, oAuth2Response);
 
-            // 소셜 프로필 정보가 변경됐다면 해당 정보를 update
-            userRepository.save(existData);
+            Token2OAuthDTO token2OAuthDTO = new Token2OAuthDTO();
+            token2OAuthDTO.setSocialUserIdentifier(sociaUserIdenfier);
+            token2OAuthDTO.setName(oAuth2Response.getName());
+            token2OAuthDTO.setRole(existData.getRole());
 
-            UserDTO userDTO = new UserDTO();
-            userDTO.setUsername(existData.getUsername());
-            userDTO.setName(oAuth2Response.getName());
-            userDTO.setRole(existData.getRole());
-
-            return new CustomOAuth2User(userDTO);
+            return new CustomOAuth2User(token2OAuthDTO);
         }
     }
 
     public void onTokenVerificationSuccess(HttpServletResponse response, CustomOAuth2User customOAuth2User) throws IOException {
-        String username = customOAuth2User.getUsername();
-        String jwtToken = jwtUtil.createJwt(username, "ROLE_USER", 60*60*60L); // 3번째 인자는 JWT의 수명
+        String socialUserIdentifier = customOAuth2User.getSocialUserIdentifier();
+        String jwtToken = jwtUtil.createJwt(socialUserIdentifier, "ROLE_USER", 60*60*60L); // 3번째 인자는 JWT의 수명
 
         response.addCookie(createCookie("Authorization", jwtToken));
-//        response.sendRedirect("http://localhost:3000/"); => 3000번 안열어놨기에 아래의 8080으로 세팅
-        response.sendRedirect("http://localhost:8080/");
+
+        // No need for redirection when handling Mobile App redirection
     }
 
     private Cookie createCookie(String key, String value) {
@@ -127,4 +121,21 @@ public class oauth2TokenService {
         return cookie;
     }
 
+    private UserEntity createNewUser(OAuth2Response oAuth2Response) {
+        UserEntity userEntity = new UserEntity();
+        String socialUserIdentifier =  oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
+        String name = oAuth2Response.getName();
+        String email = oAuth2Response.getEmail();
+        userEntity.setSocialUserIdentifier(socialUserIdentifier);
+        userEntity.setName(name);
+        userEntity.setEmail(email);
+        userEntity.setRole("ROLE_USER");
+        return userEntity;
+    }
+
+    private void updateUser(UserEntity existData, OAuth2Response oAuth2Response) {
+        existData.setEmail(oAuth2Response.getEmail());
+        existData.setName(oAuth2Response.getName());
+        userRepository.save(existData);
+    }
 }
