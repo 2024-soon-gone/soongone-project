@@ -47,7 +47,7 @@ const data = [
   },
 ];
 const Transaction = () => {
-  const [segmentSend, setSegmentSend] = useState(false);
+  const [segmentSend, setSegmentSend] = useState(true);
   return (
     <View style={styles.root}>
       <View style={styles.header}>
@@ -94,28 +94,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   header: {
-    height: '68px',
+    height: 68,
     width: '100%',
     alignItems: 'center',
   },
   segments: {
     flexDirection: 'row',
     backgroundColor: theme.grey1,
-    borderRadius: '10px',
+    borderRadius: 10,
     width: '90%',
-    height: '44px',
-    padding: '4px',
+    height: 44,
+    padding: 4,
     justifyContent: 'space-evenly',
-    gap: '4px',
+    gap: 4,
   },
   seg: {
-    flex: '1',
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: '7px',
+    borderRadius: 7,
   },
   contents: {
-    flex: '1',
+    flex: 1,
     width: '100%',
   },
 });

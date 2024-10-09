@@ -3,7 +3,7 @@ import typo from '../../../assets/Typograph';
 const ProfileIndicator = ({ value, label }) => {
   return (
     <View style={styles.root}>
-      <Text style={{ ...typo.H4, flex: '1' }}>{value}</Text>
+      <Text style={{ ...typo.H4, flex: 1 }}>{value}</Text>
       <Text style={{ ...typo.label }}>{label}</Text>
     </View>
   );
@@ -11,8 +11,8 @@ const ProfileIndicator = ({ value, label }) => {
 
 const styles = StyleSheet.create({
   root: {
-    width: '85px',
-    height: '52px',
+    width: 85,
+    height: 52,
     alignItems: 'center',
   },
 });

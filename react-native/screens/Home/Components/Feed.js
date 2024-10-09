@@ -22,9 +22,9 @@ const Feed = ({ profileUrl, userId, imageUrl, likes, comments }) => {
       </View>
       <Image style={styles.mainImg}></Image>
       <View style={styles.likeComment}>
-        <Heart style={{ marginTop: '4px' }}></Heart>
+        <Heart style={{ marginTop: 4 }}></Heart>
         {!likes && <Text style={styles.numbers}>{70}</Text>}
-        <Bubble style={{ marginLeft: '12px', marginTop: '4px' }}></Bubble>
+        <Bubble style={{ marginLeft: 12, marginTop: 4 }}></Bubble>
         {!comments && <Text style={styles.numbers}>{153}</Text>}
       </View>
       <View style={{ display: 'inline' }}>
@@ -47,33 +47,33 @@ const Feed = ({ profileUrl, userId, imageUrl, likes, comments }) => {
 const styles = StyleSheet.create({
   root: {
     width: '100%',
-    paddingHorizontal: '20px',
-    marginVertical: '10px',
+    paddingHorizontal: 20,
+    marginVertical: 10,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: '8px',
+    marginBottom: 8,
   },
   profileImg: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '16px',
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     overflow: 'hidden',
     backgroundColor: theme.blue3,
-    marginEnd: '8px',
+    marginEnd: 8,
   },
   mainImg: {
     height: WINDOW_WIDTH * 0.9,
     width: WINDOW_WIDTH * 0.9,
     backgroundColor: theme.black,
-    marginBottom: '8px',
+    marginBottom: 8,
   },
   likeComment: {
-    height: '28px',
+    height: 28,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: '8px',
+    marginBottom: 8,
   },
   numbers: {
     ...typo.body,

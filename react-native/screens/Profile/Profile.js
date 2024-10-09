@@ -48,19 +48,19 @@ const Profile = () => {
 };
 const styles = StyleSheet.create({
   root: {
-    flex: '1',
+    flex: 1,
     width: '100%',
   },
   header: {
     width: '100%',
-    height: '194px',
+    height: 194,
     backgroundColor: 'white',
   },
   header_top: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    height: '32px',
-    paddingHorizontal: '20px',
+    height: 32,
+    paddingHorizontal: 20,
   },
   film: {
     flexDirection: 'row',
@@ -73,15 +73,15 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   filmImg: {
-    width: '24px',
-    height: '24px',
-    marginEnd: '6px',
+    width: 24,
+    height: 24,
+    marginEnd: 6,
   },
   filmCount: { ...typo.body },
   header_mid: {
-    marginVertical: '12px',
+    marginVertical: 12,
     flexDirection: 'row',
-    paddingHorizontal: '20px',
+    paddingHorizontal: 20,
     justifyContent: 'space-between',
     width: '100%',
   },
@@ -89,20 +89,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   profileImg: {
-    width: '60px',
-    height: '60px',
-    borderRadius: '30px',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
   header_bottom: {
-    height: '68px',
+    height: 68,
     width: '100%',
-    paddingHorizontal: '20px',
+    paddingHorizontal: 20,
     flexDirection: 'row',
-    gap: '6px',
+    gap: 6,
   },
   introductions: {
-    flex: '1',
-    gap: '4px',
+    flex: 1,
+    gap: 4,
   },
   name: {
     ...typo.label_medium,
@@ -111,14 +111,14 @@ const styles = StyleSheet.create({
     ...typo.label_medium,
   },
   buttons: {
-    gap: '4px',
+    gap: 4,
     alignItems: 'center',
     justifyContent: 'space-evenly',
   },
   button: {
-    width: '120px',
-    height: '32px',
-    borderRadius: '8px',
+    width: 120,
+    height: 32,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: theme.grey1,

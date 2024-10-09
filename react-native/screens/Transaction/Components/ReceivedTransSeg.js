@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   header: {
-    height: '72px',
+    height: 72,
     width: '100%',
   },
 });

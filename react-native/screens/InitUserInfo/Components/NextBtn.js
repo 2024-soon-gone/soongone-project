@@ -24,10 +24,10 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '10px',
-    height: '56px',
+    borderRadius: 10,
+    height: 56,
     color: theme.white,
-    fontSize: '16px',
+    fontSize: 16,
   },
 });
 

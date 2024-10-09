@@ -13,13 +13,13 @@ function SkipButton({ onPress }) {
 const styles = StyleSheet.create({
   button: {
     display: 'flex',
-    width: '74px',
-    height: '32px',
+    width: 74,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '8px',
+    borderRadius: 10,
     color: theme.white,
-    fontSize: '12px',
+    fontSize: 12,
     backgroundColor: theme.blue2,
   },
 });

@@ -130,7 +130,7 @@ function InitUserInfo({ navigation }) {
           value={input}
         />
       </View>
-      <View style={{ alignItems: 'center', marginBottom: '20px' }}>
+      <View style={{ alignItems: 'center', marginBottom: 20 }}>
         {step < 3 && <NextButton onPress={onPress} isActivate={activated} />}
       </View>
     </KeyboardAvoidingView>
@@ -141,28 +141,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   top: {
-    height: '48px',
+    height: 48,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: '20px',
+    paddingHorizontal: 20,
   },
   indicator: {
-    height: '48px',
+    height: 48,
     justifyContent: 'center',
-    paddingStart: '20px',
+    paddingStart: 20,
   },
   guide: {
-    fontSize: '24px',
+    fontSize: 24,
     color: theme.grey5,
     fontWeight: '700',
-    marginLeft: '20px',
+    marginLeft: 20,
   },
   input: {
-    fontSize: '24px',
+    fontSize: 24,
     fontWeight: '700',
-    marginTop: '50px',
-    marginHorizontal: '20px',
+    marginTop: 50,
+    marginHorizontal: 20,
   },
 });
 

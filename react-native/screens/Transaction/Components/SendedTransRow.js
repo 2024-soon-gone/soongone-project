@@ -21,27 +21,27 @@ const SendedTransRow = ({ data }) => {
 const styles = StyleSheet.create({
   root: {
     width: '100%',
-    height: '72px',
+    height: 72,
     flexDirection: 'row',
-    paddingHorizontal: '20px',
-    paddingVertical: '8px',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
   },
   image: {
-    width: '60px',
-    height: '60px',
-    borderRadius: '10px',
-    marginRight: '12px',
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    marginRight: 12,
   },
   center: {},
-  tail: { flex: '1', alignItems: 'flex-end', justifyContent: 'space-evenly' },
+  tail: { flex: 1, alignItems: 'flex-end', justifyContent: 'space-evenly' },
   name: {
     ...typo.body,
-    flex: '1',
+    flex: 1,
     color: theme.grey6,
   },
   price: {
     ...typo.H4,
-    flex: '1',
+    flex: 1,
   },
   create: {
     ...typo.label_medium,

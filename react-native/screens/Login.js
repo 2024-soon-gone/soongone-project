@@ -27,12 +27,12 @@ function Login({ navigation }) {
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
-      <View style={{ marginTop: '156px' }}>
+      <View style={{ marginTop: 156 }}>
         <Logo />
       </View>
       <Pressable
         style={({ pressed }) => [
-          { opacity: pressed ? 0.5 : 1.0, ...styles.btn, marginTop: '120px' },
+          { opacity: pressed ? 0.5 : 1.0, ...styles.btn, marginTop: 120 },
           styles.defaultStyling,
         ]}
         onPress={() => promptAsync()}
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     height: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '10px',
+    borderRadius: 10,
     backgroundColor: '#FFFFFF',
     borderColor: theme.grey2,
     flexDirection: 'row',

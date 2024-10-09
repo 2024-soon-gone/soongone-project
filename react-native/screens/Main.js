@@ -25,16 +25,16 @@ function Main() {
         tabBarShowLabel: true,
         headerShown: false,
         tabBarStyle: {
-          paddingBottom: '12px',
-          height: '83px',
+          paddingBottom: 12,
+          height: 83,
         },
         tabBarItemStyle: {
-          height: '49px',
-          paddingTop: '7px',
+          height: 49,
+          paddingTop: 7,
           bottom: 0,
         },
         tabBarIconStyle: {
-          marginBottom: '3.87px',
+          marginBottom: 3.87,
         },
       }}
     >

@@ -13,13 +13,13 @@ function AcceptButton({ onPress }) {
 const styles = StyleSheet.create({
   button: {
     display: 'flex',
-    width: '53px',
-    height: '32px',
+    width: 53,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '8px',
+    borderRadius: 8,
     color: theme.white,
-    fontSize: '12px',
+    fontSize: 12,
     backgroundColor: theme.black,
   },
 });
