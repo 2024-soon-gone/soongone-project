@@ -56,6 +56,11 @@ export class NftController {
       );
     }
   }
+  @Get('ping')
+  responsePing(@Query('sender') sender: String): String {
+    console.log(' Block Chain Server Ping Request');
+    return 'Ping Returned and Sender caught : ' + sender;
+  }
 }
 
 // @Controller('lend-and-borrow')

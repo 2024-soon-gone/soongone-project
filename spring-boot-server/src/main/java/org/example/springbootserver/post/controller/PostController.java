@@ -1,6 +1,7 @@
 package org.example.springbootserver.post.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.springbootserver.onchain.service.NftService;
 import org.example.springbootserver.post.dto.PostDTO;
 import org.example.springbootserver.post.dto.PostRequestDTO;
 import org.example.springbootserver.post.entity.PostEntity;
@@ -20,6 +21,7 @@ import java.util.Optional;
 public class PostController {
 
     private final PostService postService;
+    private final NftService nftService;
 
     // Create a new Post
     @PostMapping("/createPost")
@@ -28,9 +30,16 @@ public class PostController {
         return new ResponseEntity<>(createdPostDTO, HttpStatus.CREATED);
     }
 
+
+    @PostMapping("/postImage")
+    public ResponseEntity<String > postImage(@RequestParam("image") MultipartFile file) throws IOException {
+        String pingRes = nftService.pingResponse();
+        return new ResponseEntity<>(pingRes, HttpStatus.CREATED);
+    }
 //    @PostMapping("/image")
 //    public void postImage(@RequestParam("image") MultipartFile file) throws IOException {
-//
+//        String pingRes = nftService.pingResponse();
+//        return
 //    }
 
     // 일단 아래는 PostEntity -> PostDTO 아직 안함

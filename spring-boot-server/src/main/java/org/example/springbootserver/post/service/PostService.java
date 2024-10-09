@@ -54,12 +54,17 @@ public class PostService {
 
 //    @Transactional
 //    public void postImage(MultipartFile image) throws IOException {
+//        String new
+//    }
+
+
+//    @Transactional
+//    public void postImage(MultipartFile image) throws IOException {
 //        // Get Current User
 //        String newImagePath =
 //                image == null ? profileImageGenerator.getDefaultProfileImagePath() : updatePostImage(image);
 //        String newImagePath = updatePostImage(image);
 //
-//        String newImagePath = updatePostImage(image);
 //    }
 
 //    private String updatePostImage(MultipartFile image) throws IOException {
