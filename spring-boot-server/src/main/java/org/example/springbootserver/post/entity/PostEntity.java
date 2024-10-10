@@ -29,7 +29,7 @@ public class PostEntity extends BaseEntity {
 
     // After first set and never changed
     @ManyToOne
-    private UserEntity genUserId;
+    private UserEntity genUserEntity;
 //    private Long genUserId;
 
     private String location;

@@ -24,7 +24,7 @@ public class PostDTO {
                 .nftAddress(postEntity.getNftAddress())
                 .nftId(postEntity.getNftId())
                 .text(postEntity.getText())
-                .genUser(UserDTO.from(postEntity.getGenUserId())) // UserDTO로 변환
+                .genUser(UserDTO.from(postEntity.getGenUserEntity())) // UserDTO로 변환
                 .location(postEntity.getLocation())
                 .likes(postEntity.getLikes())
                 .comments(postEntity.getCommentCounts())
