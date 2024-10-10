@@ -28,6 +28,14 @@
       "eas": {
         "projectId": "8266cc2c-268b-4d1b-ae6b-32144ccd02b1"
       }
-    }
+    },
+    "plugins": [
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera."
+        }
+      ]
+    ]
   }
 }

@@ -12,6 +12,7 @@ import HomeScreen from './Home/Home';
 import SearchScreen from './Search/Search';
 import TranscationScreen from './Transaction/Transaction';
 import ProfileScreen from './Profile/Profile';
+import CameraScreen from './Camera/CameraMock';
 
 const Tab = createBottomTabNavigator();
 
@@ -90,10 +91,6 @@ function Main() {
       />
     </Tab.Navigator>
   );
-}
-
-function CameraScreen() {
-  return <Text>Camera</Text>;
 }
 
 export default Main;
