@@ -94,13 +94,16 @@ export class NftService {
       await transaction.wait();
       console.log(`NFT Minted with metadata: ${jsonIpfsHash}`);
 
+      const imgIpfsUri = process.env.IPFS_FETCH_SUFFIX + '/' + imgIpfsHash;
+      console.log(`NFT IMG uploaded on : ${imgIpfsUri} `);
+
       // Return a success response
       return {
         statusCode: HttpStatus.CREATED,
         message: 'NFT successfully minted',
         nftIpfsHash: jsonIpfsHash,
         transactionHash: transaction.hash, // Include transaction details
-        nftImgHash: imgIpfsHash,
+        nftImgIpfsUri: imgIpfsUri,
       };
     } catch (error) {
       throw new HttpException(

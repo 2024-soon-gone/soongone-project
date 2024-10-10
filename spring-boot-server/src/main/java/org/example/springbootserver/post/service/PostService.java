@@ -83,7 +83,7 @@ public class PostService {
         // Assuming the response is in JSON format, parse it
         ObjectMapper objectMapper = new ObjectMapper();
         NftMintResponseDTO nftMintResponseDTO = objectMapper.readValue(nftMintResponse, NftMintResponseDTO.class);
-        String imgIpfsHash = nftMintResponseDTO.getNftImgHash();
+        String imgIpfsHash = nftMintResponseDTO.getNftImgIpfsUri();
 
 //        JSONObject jsonResponse = new JSONObject(nftMintResponse);
 //        String imgIpfsHash = jsonResponse.getString("nftImgHash");
@@ -94,17 +94,6 @@ public class PostService {
 
         return nftMintResponseDTO;
     }
-
-
-
-//    @Transactional
-//    public void postImage(MultipartFile image) throws IOException {
-//        // Get Current User
-//        String newImagePath =
-//                image == null ? profileImageGenerator.getDefaultProfileImagePath() : updatePostImage(image);
-//        String newImagePath = updatePostImage(image);
-//
-//    }
 
 //    private String updatePostImage(MultipartFile image) throws IOException {
 //        return s3Service.uploadImageFile(image, PROFILE_IMAGE_BUCKET_NAME);

@@ -41,21 +41,6 @@ public class NftService {
         return responseEntity.getBody();
     }
 
-//    public String nftMintRequest() {
-//        URI uri =
-//                UriComponentsBuilder.fromUriString(NftConstant.BC_SERVER_URL)
-//                        .path("/nft/mint")
-//                        .encode()
-//                        .build()
-//                        .toUri();
-//
-//        RestTemplate restTemplate = new RestTemplate();
-//        ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
-//
-//        return responseEntity.getBody();
-//    }
-
-
     public String nftMintRequest(String accountAddress, String name, String description, MultipartFile file) throws IOException {
         // Build the URI
         URI uri = UriComponentsBuilder.fromUriString(NftConstant.BC_SERVER_URL)

@@ -31,26 +31,18 @@ public class PostController {
         return new ResponseEntity<>(createdPostDTO, HttpStatus.CREATED);
     }
 
-
-    @PostMapping("/ping")
-    public ResponseEntity<String> ping(@RequestParam("image") MultipartFile file) throws IOException {
-        String pingRes = nftService.pingResponse();
-        return new ResponseEntity<>(pingRes, HttpStatus.CREATED);
-    }
-
     @PostMapping("/postImage")
     public ResponseEntity<NftMintResponseDTO> postImage(@RequestParam("image") MultipartFile file) throws IOException {
 //        String nftMintResponse = postService.postImage(file);
         NftMintResponseDTO nftMintResponse = postService.postImage(file);
         return new ResponseEntity<>(nftMintResponse, HttpStatus.CREATED);
     }
-//    @PostMapping("/image")
-//    public void postImage(@RequestParam("image") MultipartFile file) throws IOException {
-//        String pingRes = nftService.pingResponse();
-//        return
-//    }
 
-    // 일단 아래는 PostEntity -> PostDTO 아직 안함
+//    @PostMapping("/ping") // Test for HttpRequest on Block Chain Server
+//    public ResponseEntity<String> ping(@RequestParam("image") MultipartFile file) throws IOException {
+//        String pingRes = nftService.pingResponse();
+//        return new ResponseEntity<>(pingRes, HttpStatus.CREATED);
+//    }
 
     // Get all Posts
     @GetMapping
