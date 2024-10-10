@@ -57,50 +57,57 @@ export class NftService {
     }
   }
 
-  async mintNft(mintDto: MintDto, file: Express.Multer.File): Promise<string> {
+  async mintNft(mintDto: MintDto, file: Express.Multer.File): Promise<any> {
     let imgIpfsHash: string;
     let jsonIpfsHash: string;
 
+    // Upload image to IPFS
     try {
       imgIpfsHash = await this.ipfsFileUpload(mintDto, file);
       console.log(`Image IPFS Hash: ${imgIpfsHash}`);
     } catch (error) {
       throw new HttpException(
         `Failed to upload image to IPFS: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.BAD_REQUEST, // Use BAD_REQUEST for client-side issues like file upload failure
       );
     }
 
+    // Upload metadata to IPFS
     try {
       jsonIpfsHash = await this.ipfsJsonUpload(mintDto, imgIpfsHash);
       console.log(`JSON IPFS Hash: ${jsonIpfsHash}`);
     } catch (error) {
       throw new HttpException(
         `Failed to upload JSON metadata to IPFS: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.INTERNAL_SERVER_ERROR, // Server-side error for metadata upload failure
       );
     }
 
-    // If you need to proceed with minting after successful IPFS uploads
+    // Mint the NFT after successful IPFS uploads
     try {
       const tokenURI = 'ipfs://' + jsonIpfsHash;
-      // Call the mint function on your smart contract
       const transaction = await this.nftContract
         .connect(this.adminWallet)
         .safeMint(mintDto.accountAddress, tokenURI);
+
       // Wait for the transaction to be mined
       await transaction.wait();
       console.log(`NFT Minted with metadata: ${jsonIpfsHash}`);
-      return `NFT Minted with metadata IPFS hash: ${jsonIpfsHash}`;
+
+      // Return a success response
+      return {
+        statusCode: HttpStatus.CREATED,
+        message: 'NFT successfully minted',
+        nftIpfsHash: jsonIpfsHash,
+        transactionHash: transaction.hash, // Include transaction details
+        nftImgHash: imgIpfsHash,
+      };
     } catch (error) {
       throw new HttpException(
         `Failed to mint NFT: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.INTERNAL_SERVER_ERROR, // Server-side error for minting failure
       );
     }
-
-    // // For now, just returning the IPFS hash of the uploaded image as a placeholder
-    // return 'IPFS Hash of NFT Image: ' + imgIpfsHash;
   }
 
   async ipfsFileUpload(

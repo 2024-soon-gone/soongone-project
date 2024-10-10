@@ -1,10 +1,17 @@
 package org.example.springbootserver.post.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.minidev.json.JSONObject;
+import org.example.springbootserver.onchain.constant.NftConstant;
+import org.example.springbootserver.onchain.dto.NftMintResponseDTO;
+import org.example.springbootserver.onchain.service.NftService;
 import org.example.springbootserver.post.dto.PostDTO;
 import org.example.springbootserver.post.dto.PostRequestDTO;
+import org.example.springbootserver.post.entity.ImageEntity;
 import org.example.springbootserver.post.entity.PostEntity;
+import org.example.springbootserver.post.repository.ImageRepository;
 import org.example.springbootserver.post.repository.PostRepository;
 import org.example.springbootserver.user.entity.UserEntity;
 import org.example.springbootserver.user.exception.UserNotFoundException;
@@ -21,6 +28,8 @@ import java.util.Optional;
 public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final ImageRepository imageRepository;
+    private final NftService nftService;
 
     // Create a new Post
     public PostDTO createPost(PostRequestDTO postRequestDTO) {
@@ -52,10 +61,40 @@ public class PostService {
         return PostDTO.from(post);
     }
 
-//    @Transactional
-//    public void postImage(MultipartFile image) throws IOException {
-//        String new
-//    }
+    @Transactional
+    public NftMintResponseDTO postImage(MultipartFile image) throws IOException {
+        // Retrieve the current user - assuming you have a method to get the logged-in user's ID
+        Long sampleUserId = 1L;  // Replace with actual logic for current user
+        UserEntity currentUser = userRepository.findById(sampleUserId)
+                .orElseThrow(() -> new UserNotFoundException(sampleUserId));
+
+        // Fetch the most recent post created by the user
+        PostEntity latestPost = postRepository.findTopByGenUserIdOrderByCreatedAtDesc(currentUser)
+                .orElseThrow(() -> new IllegalArgumentException("No posts found for user: " + currentUser.getId()));
+
+        // Prepare details for NFT minting
+        String accountAddress = "0x53eFa01771483b13D10618D3865791baf84Fe97b";  // Test account set to minting user
+        String name = currentUser.getName();
+        String description = latestPost.getText();  // Post's description/text
+
+        // Call NFT service to mint an NFT
+        String nftMintResponse = nftService.nftMintRequest(accountAddress, name, description, image);
+
+        // Assuming the response is in JSON format, parse it
+        ObjectMapper objectMapper = new ObjectMapper();
+        NftMintResponseDTO nftMintResponseDTO = objectMapper.readValue(nftMintResponse, NftMintResponseDTO.class);
+        String imgIpfsHash = nftMintResponseDTO.getNftImgHash();
+
+//        JSONObject jsonResponse = new JSONObject(nftMintResponse);
+//        String imgIpfsHash = jsonResponse.getString("nftImgHash");
+
+        // Store the image URL in ImageEntity and associate it with the latest post
+        ImageEntity newImage = new ImageEntity(NftConstant.IPFS_FETCH_SUFFIX + "/" + imgIpfsHash, latestPost);
+        imageRepository.save(newImage);
+
+        return nftMintResponseDTO;
+    }
+
 
 
 //    @Transactional
@@ -83,7 +122,6 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
         return PostDTO.from(post);
     }
-
 
     // Update a Post
     public PostDTO updatePost(Long id, PostRequestDTO updatedPostDTO) {

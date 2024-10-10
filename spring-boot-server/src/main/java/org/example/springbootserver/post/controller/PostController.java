@@ -1,6 +1,7 @@
 package org.example.springbootserver.post.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.springbootserver.onchain.dto.NftMintResponseDTO;
 import org.example.springbootserver.onchain.service.NftService;
 import org.example.springbootserver.post.dto.PostDTO;
 import org.example.springbootserver.post.dto.PostRequestDTO;
@@ -31,10 +32,17 @@ public class PostController {
     }
 
 
-    @PostMapping("/postImage")
-    public ResponseEntity<String > postImage(@RequestParam("image") MultipartFile file) throws IOException {
+    @PostMapping("/ping")
+    public ResponseEntity<String> ping(@RequestParam("image") MultipartFile file) throws IOException {
         String pingRes = nftService.pingResponse();
         return new ResponseEntity<>(pingRes, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/postImage")
+    public ResponseEntity<NftMintResponseDTO> postImage(@RequestParam("image") MultipartFile file) throws IOException {
+//        String nftMintResponse = postService.postImage(file);
+        NftMintResponseDTO nftMintResponse = postService.postImage(file);
+        return new ResponseEntity<>(nftMintResponse, HttpStatus.CREATED);
     }
 //    @PostMapping("/image")
 //    public void postImage(@RequestParam("image") MultipartFile file) throws IOException {
