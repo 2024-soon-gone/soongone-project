@@ -3,12 +3,11 @@ package org.example.springbootserver.post.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.minidev.json.JSONObject;
-import org.example.springbootserver.onchain.constant.NftConstant;
 import org.example.springbootserver.onchain.dto.NftMintResponseDTO;
 import org.example.springbootserver.onchain.service.NftService;
 import org.example.springbootserver.post.dto.PostDTO;
 import org.example.springbootserver.post.dto.PostRequestDTO;
+import org.example.springbootserver.post.dto.PostWithImgDTO;
 import org.example.springbootserver.post.entity.ImageEntity;
 import org.example.springbootserver.post.entity.PostEntity;
 import org.example.springbootserver.post.repository.ImageRepository;
@@ -21,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -98,11 +96,17 @@ public class PostService {
     }
 
     // Read a Post by ID
-    public PostDTO getPostById(Long id) {
+    public PostWithImgDTO getPostById(Long id) {
         PostEntity post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
-//        ImageEntity img = imageRepository.findBy
-        return PostDTO.from(post);
+        ImageEntity img = imageRepository.findByPostEntity_Id(post.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Image not found with PostEntity_Id: " + post.getId()));
+
+//        return PostDTO.from(post);
+        return PostWithImgDTO.builder()
+                .postDTO(PostDTO.from(post))
+                .nftImgIpfsUri(img.getImgUrl())
+                .build();
     }
 
     // Update a Post

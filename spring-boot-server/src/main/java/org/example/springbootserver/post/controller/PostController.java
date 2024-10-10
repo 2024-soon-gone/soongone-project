@@ -5,7 +5,7 @@ import org.example.springbootserver.onchain.dto.NftMintResponseDTO;
 import org.example.springbootserver.onchain.service.NftService;
 import org.example.springbootserver.post.dto.PostDTO;
 import org.example.springbootserver.post.dto.PostRequestDTO;
-import org.example.springbootserver.post.entity.PostEntity;
+import org.example.springbootserver.post.dto.PostWithImgDTO;
 import org.example.springbootserver.post.service.PostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/post")
@@ -53,9 +52,9 @@ public class PostController {
 
     // Get a Post by ID
     @GetMapping("/{id}")
-    public ResponseEntity<PostDTO> getPostById(@PathVariable Long id) {
-        PostDTO postFound = postService.getPostById(id);
-        return new ResponseEntity<>(postFound, HttpStatus.OK);
+    public ResponseEntity<PostWithImgDTO> getPostById(@PathVariable Long id) {
+        PostWithImgDTO postwWithImgFound = postService.getPostById(id);
+        return new ResponseEntity<>(postwWithImgFound, HttpStatus.OK);
     }
 
     // Update a Post
