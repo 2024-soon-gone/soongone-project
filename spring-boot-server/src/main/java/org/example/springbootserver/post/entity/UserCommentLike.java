@@ -24,7 +24,7 @@ public class UserCommentLike extends BaseEntity {
 
     @NonNull
     @OneToOne
-    private PostEntity postId;
+    private PostEntity postEntity;
 
     @NonNull
     @OneToMany(fetch = FetchType.EAGER)

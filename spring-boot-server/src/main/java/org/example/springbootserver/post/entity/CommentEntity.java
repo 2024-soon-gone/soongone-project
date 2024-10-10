@@ -23,15 +23,15 @@ public class CommentEntity extends BaseEntity {
 
     @NonNull
     @ManyToOne
-    private UserEntity userId;
+    private UserEntity userEntity;
     //    private Long userId;
 
     @NonNull
     @ManyToOne
-    private PostEntity postId;
+    private PostEntity postEntity;
 //    private Long postId;
 
     @OneToOne
-    private CommentEntity parentCommentId;
+    private CommentEntity parentCommentEntity;
 //    private Long parentCommentId;
 }

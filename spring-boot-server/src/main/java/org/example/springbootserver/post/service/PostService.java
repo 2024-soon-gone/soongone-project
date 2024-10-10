@@ -50,7 +50,7 @@ public class PostService {
                 .nftAddress(sampleNftAddress)
                 .nftId(sampleNftId)
                 .text(postRequestDTO.getText())
-                .genUserId(sampleGenUser)
+                .genUserEntity(sampleGenUser)
                 .location(postRequestDTO.getLocation())
                 .likes(initLikes)
                 .commentCounts(initComments)
@@ -69,7 +69,7 @@ public class PostService {
                 .orElseThrow(() -> new UserNotFoundException(sampleUserId));
 
         // Fetch the most recent post created by the user
-        PostEntity latestPost = postRepository.findTopByGenUserIdOrderByCreatedAtDesc(currentUser)
+        PostEntity latestPost = postRepository.findTopByGenUserEntityOrderByCreatedAtDesc(currentUser)
                 .orElseThrow(() -> new IllegalArgumentException("No posts found for user: " + currentUser.getId()));
 
         // Prepare details for NFT minting
@@ -83,21 +83,13 @@ public class PostService {
         // Assuming the response is in JSON format, parse it
         ObjectMapper objectMapper = new ObjectMapper();
         NftMintResponseDTO nftMintResponseDTO = objectMapper.readValue(nftMintResponse, NftMintResponseDTO.class);
-        String imgIpfsHash = nftMintResponseDTO.getNftImgIpfsUri();
+        String nftImgIpfsUri = nftMintResponseDTO.getNftImgIpfsUri();
 
-//        JSONObject jsonResponse = new JSONObject(nftMintResponse);
-//        String imgIpfsHash = jsonResponse.getString("nftImgHash");
-
-        // Store the image URL in ImageEntity and associate it with the latest post
-        ImageEntity newImage = new ImageEntity(NftConstant.IPFS_FETCH_SUFFIX + "/" + imgIpfsHash, latestPost);
+        ImageEntity newImage = new ImageEntity(nftImgIpfsUri, latestPost);
         imageRepository.save(newImage);
 
         return nftMintResponseDTO;
     }
-
-//    private String updatePostImage(MultipartFile image) throws IOException {
-//        return s3Service.uploadImageFile(image, PROFILE_IMAGE_BUCKET_NAME);
-//    }
 
     // Read all Posts
     public List<PostDTO> getAllPosts() {
@@ -109,6 +101,7 @@ public class PostService {
     public PostDTO getPostById(Long id) {
         PostEntity post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
+//        ImageEntity img = imageRepository.findBy
         return PostDTO.from(post);
     }
 
