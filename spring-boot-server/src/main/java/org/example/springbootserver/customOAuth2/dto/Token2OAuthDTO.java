@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserDTO {
+public class Token2OAuthDTO {
     private String role;
     private String name;
-    private String username;
+    private String socialUserIdentifier;
 }
