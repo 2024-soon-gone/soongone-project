@@ -3,25 +3,32 @@ import { View, Text, Pressable, StyleSheet, Image } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import { GOOGLE_AUTH_CLIENTID } from '@env';
+import {
+  GOOGLE_AUTH_CLIENTID,
+  GOOGLE_AUTH_CLIENTID_ANDROID,
+  BASEURL,
+} from '@env';
 import Logo from '../assets/logo.svg';
 import typo from '../assets/Typograph';
 import theme from '../assets/Theme';
+import axios from 'axios';
+import { setItem } from '../Utils/Storage/AsyncStorage';
 
 WebBrowser.maybeCompleteAuthSession();
 
 function Login({ navigation }) {
+  const url = `${BASEURL}/oauth2Verify?provider=google&accessToken=`;
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: GOOGLE_AUTH_CLIENTID,
+    androidClientId: GOOGLE_AUTH_CLIENTID_ANDROID,
   });
   useEffect(() => {
     if (response?.type === 'success') {
       const { authentication } = response;
-      console.log(authentication);
-      // TODO : 백엔드에 인증받는 로직 -> 이미 유저인 경우 바로 main으로
-      //        그렇지 않으면 onboarding으로
-
-      navigation.navigate('InitUserInfo');
+      axios.get(url + authentication.accessToken).then((res) => {
+        console.log(res.data);
+      });
+      // navigation.navigate('InitUserInfo');
     }
   }, [response]);
   return (
