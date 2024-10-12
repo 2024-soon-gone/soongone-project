@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import org.example.springbootserver.jwt.JWTUtil;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class oauth2TokenService {
     private final OAuthUserRepository oAuthUserRepository;
     private final JWTUtil jwtUtil;
 
-    public CustomOAuth2User verifyAccessToken(String provider, String accessToken) throws OAuth2AuthenticationException {
+    public void verifyAccessToken(String provider, String accessToken, HttpServletResponse response) throws OAuth2AuthenticationException, IOException {
 
         if(provider == null){
             System.out.println("Provider is null");
@@ -65,8 +66,7 @@ public class oauth2TokenService {
             oAuth2Response = new GoogleResponse(googleUserAttributes);
         }
         else {
-
-            return null;
+            throw new OAuth2AuthenticationException("Provider is not supported");
         }
 
         //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만듬
@@ -88,7 +88,8 @@ public class oauth2TokenService {
             token2OAuthDTO.setName(oAuth2Response.getName());
             token2OAuthDTO.setRole("ROLE_USER");
 
-            return new CustomOAuth2User(token2OAuthDTO);
+            onTokenVerificationSuccess(response,new CustomOAuth2User(token2OAuthDTO), true);
+
         }
         else{ // 기존 유저가 존재한다면
             updateUser(existData, oAuth2Response);
@@ -98,11 +99,11 @@ public class oauth2TokenService {
             token2OAuthDTO.setName(oAuth2Response.getName());
             token2OAuthDTO.setRole(existData.getRole());
 
-            return new CustomOAuth2User(token2OAuthDTO);
+            onTokenVerificationSuccess(response,new CustomOAuth2User(token2OAuthDTO), false);
         }
     }
 
-    public void onTokenVerificationSuccess(HttpServletResponse response, CustomOAuth2User customOAuth2User) throws IOException {
+    public void onTokenVerificationSuccess(HttpServletResponse response, CustomOAuth2User customOAuth2User, boolean isFirst) throws IOException {
         String socialUserIdentifier = customOAuth2User.getSocialUserIdentifier();
         String jwtToken = jwtUtil.createJwt(socialUserIdentifier, "ROLE_USER", 60*60*60L); // 3번째 인자는 JWT의 수명
 
@@ -113,6 +114,7 @@ public class oauth2TokenService {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("jwtToken", jwtToken);
         responseBody.put("message", "Social Login Successful and Jwt Token created");
+        responseBody.put("isFirst", isFirst);
 
         // Set content type and write JSON to response
         response.setContentType("application/json");
@@ -121,8 +123,8 @@ public class oauth2TokenService {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonResponse = objectMapper.writeValueAsString(responseBody);
 
-        response.getWriter().write(jsonResponse);
-        response.getWriter().flush();
+        response.getOutputStream().write(jsonResponse.getBytes(StandardCharsets.UTF_8));
+        response.getOutputStream().flush();
         // No need for redirection when handling Mobile App redirection
     }
 

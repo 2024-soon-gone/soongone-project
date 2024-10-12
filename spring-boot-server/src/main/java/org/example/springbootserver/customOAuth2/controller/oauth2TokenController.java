@@ -2,7 +2,6 @@ package org.example.springbootserver.customOAuth2.controller;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.springbootserver.customOAuth2.dto.CustomOAuth2User;
 import org.example.springbootserver.customOAuth2.service.oauth2TokenService;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,15 +22,14 @@ public class oauth2TokenController {
     @ResponseBody
     public String verifyUser(@RequestParam("provider") String provider, @RequestParam("accessToken") String accessToken,HttpServletResponse response) throws IOException {
 
-        CustomOAuth2User customOAuth2User = oauth2TokenService.verifyAccessToken(provider, accessToken);
-        if (customOAuth2User == null) {
-            return "oauth2 verify failed : oAuth2User is null";
-        }
+
+
         // Return the response body (user info) or handle error
         try {
+//            CustomOAuth2User customOAuth2User = oauth2TokenService.verifyAccessToken(provider, accessToken,response );
+            oauth2TokenService.verifyAccessToken(provider, accessToken,response );
             // Call the method to process the successful verification
-            oauth2TokenService.onTokenVerificationSuccess(response, customOAuth2User);
-            return "OAuth2 verification process completed successfully.";
+            return null;
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("onTokenVerificationSuccess exception: " + e);
