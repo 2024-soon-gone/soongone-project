@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import org.example.springbootserver.jwt.JWTUtil;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -107,6 +108,21 @@ public class oauth2TokenService {
 
         response.addCookie(createCookie("Authorization", jwtToken));
 
+        // Manually setting jwtToken in Response Body
+        // Prepare response body as JSON
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("jwtToken", jwtToken);
+        responseBody.put("message", "Social Login Successful and Jwt Token created");
+
+        // Set content type and write JSON to response
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponse = objectMapper.writeValueAsString(responseBody);
+
+        response.getWriter().write(jsonResponse);
+        response.getWriter().flush();
         // No need for redirection when handling Mobile App redirection
     }
 
