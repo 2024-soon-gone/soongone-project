@@ -27,8 +27,12 @@ function Login({ navigation }) {
       const { authentication } = response;
       axios.get(url + authentication.accessToken).then((res) => {
         console.log(res.data);
+
+        setItem('JWT', res.data.jwtToken);
+        // if (res.data.isFirst) navigation.navigate('InitUserInfo');
+        if (true) navigation.navigate('InitUserInfo');
+        else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
       });
-      // navigation.navigate('InitUserInfo');
     }
   }, [response]);
   return (

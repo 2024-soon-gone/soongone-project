@@ -19,7 +19,7 @@ const Tab = createBottomTabNavigator();
 function Main() {
   return (
     <Tab.Navigator
-      initialRouteName="Profile"
+      initialRouteName="Home"
       screenOptions={{
         tabBarActiveTintColor: theme.black,
         tabBarInactiveTintColor: theme.grey3,

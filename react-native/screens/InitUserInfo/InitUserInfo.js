@@ -107,18 +107,23 @@ function InitUserInfo({ navigation }) {
   };
   const onDonePress = () => {
     // TODO: backend에 유저 정보 전달
-    navigation.navigate('Main');
+    const DoneUserinfo = {
+      ...userinfo,
+      intro: input,
+    };
+    console.log(DoneUserinfo);
+    navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   };
 
   return (
     <KeyboardAvoidingView style={styles.rootContainer}>
       <View style={styles.top}>
         <BackButton onPress={onBackPress} />
-        {step == 2 && <SkipButton onPress={onPress} />}
-        {step == 3 && <DoneButton onPress={onDonePress} />}
+        {/* {step == 2 && <SkipButton onPress={onPress} />} */}
+        {step == 2 && <DoneButton onPress={onDonePress} />}
       </View>
       <View style={styles.indicator}>
-        <Indicator total={4} active={step} />
+        <Indicator total={3} active={step} />
       </View>
       <Text style={styles.guide}>{guideSet[step]}</Text>
       <View style={{ flex: 1 }}>
@@ -131,7 +136,7 @@ function InitUserInfo({ navigation }) {
         />
       </View>
       <View style={{ alignItems: 'center', marginBottom: 20 }}>
-        {step < 3 && <NextButton onPress={onPress} isActivate={activated} />}
+        {step < 2 && <NextButton onPress={onPress} isActivate={activated} />}
       </View>
     </KeyboardAvoidingView>
   );
