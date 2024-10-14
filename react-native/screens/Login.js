@@ -12,7 +12,7 @@ import Logo from '../assets/logo.svg';
 import typo from '../assets/Typograph';
 import theme from '../assets/Theme';
 import axios from 'axios';
-import { setItem } from '../Utils/Storage/AsyncStorage';
+import { setItem, getItem } from '../Utils/Storage/AsyncStorage';
 import {
   GoogleSignin,
   statusCodes,
@@ -40,9 +40,17 @@ function Login({ navigation }) {
   //   }
   // }, [response]);
   useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: GOOGLE_AUTH_CLIENTID,
-    });
+    const checkAndSignIn = async () => {
+      const jwt = await getItem('JWT');
+      if (jwt !== '') {
+        console.log(jwt);
+        navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+      }
+      GoogleSignin.configure({
+        webClientId: GOOGLE_AUTH_CLIENTID,
+      });
+    };
+    checkAndSignIn();
   }, []);
 
   signIn = async () => {
@@ -57,9 +65,9 @@ function Login({ navigation }) {
         GoogleSignin.signOut();
         axios.get(url + tokens.accessToken).then((res) => {
           setItem('JWT', res.data.jwtToken);
-          // // if (res.data.isFirst) navigation.navigate('InitUserInfo');
-          if (true) navigation.navigate('InitUserInfo');
-          // else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+
+          if (res.data.isFirst) navigation.navigate('InitUserInfo');
+          else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
         });
       } else {
         throw new Error('no ID token present!');

@@ -12,7 +12,7 @@ import HomeScreen from './Home/Home';
 import SearchScreen from './Search/Search';
 import TranscationScreen from './Transaction/Transaction';
 import ProfileScreen from './Profile/Profile';
-import CameraScreen from './Camera/CameraMock';
+import CameraScreen from './Camera/Camera';
 
 const Tab = createBottomTabNavigator();
 
