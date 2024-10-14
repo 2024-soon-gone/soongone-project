@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import theme from '../../../assets/Theme';
 function DoneButton({ onPress }) {
   return (
-    <Pressable>
-      <Text style={styles.button} onPress={onPress}>
+    <Pressable style={styles.button}>
+      <Text style={styles.text} onPress={onPress}>
         완료
       </Text>
     </Pressable>
@@ -18,9 +18,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
+    backgroundColor: theme.black,
+  },
+  text: {
     color: theme.white,
     fontSize: 12,
-    backgroundColor: theme.black,
   },
 });
 
