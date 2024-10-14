@@ -1,4 +1,4 @@
-import React, { useState, createRef, act } from 'react';
+import { useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,7 +9,6 @@ import {
 import theme from '../../assets/Theme';
 import BackButton from './Components/BackBtn';
 import NextButton from './Components/NextBtn';
-import SkipButton from './Components/SkipBtn';
 import DoneButton from './Components/DoneBtn';
 import Indicator from './Components/Indicator';
 
@@ -119,7 +118,6 @@ function InitUserInfo({ navigation }) {
     <KeyboardAvoidingView style={styles.rootContainer}>
       <View style={styles.top}>
         <BackButton onPress={onBackPress} />
-        {/* {step == 2 && <SkipButton onPress={onPress} />} */}
         {step == 2 && <DoneButton onPress={onDonePress} />}
       </View>
       <View style={styles.indicator}>

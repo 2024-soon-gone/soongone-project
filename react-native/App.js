@@ -11,7 +11,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName="InitUserInfo"
         screenOptions={{
           headerShown: true,
           headerTitleAlign: 'center',

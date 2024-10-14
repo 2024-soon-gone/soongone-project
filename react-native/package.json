@@ -12,6 +12,7 @@
     "@expo/metro-runtime": "~3.2.3",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-community/masked-view": "^0.1.11",
+    "@react-native-google-signin/google-signin": "^13.1.0",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",

@@ -13,28 +13,69 @@ import typo from '../assets/Typograph';
 import theme from '../assets/Theme';
 import axios from 'axios';
 import { setItem } from '../Utils/Storage/AsyncStorage';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 WebBrowser.maybeCompleteAuthSession();
 
 function Login({ navigation }) {
   const url = `${BASEURL}/oauth2Verify?provider=google&accessToken=`;
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: GOOGLE_AUTH_CLIENTID,
-    androidClientId: GOOGLE_AUTH_CLIENTID_ANDROID,
-  });
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      axios.get(url + authentication.accessToken).then((res) => {
-        console.log(res.data);
+  // const [request, response, promptAsync] = Google.useAuthRequest({
+  //   webClientId: GOOGLE_AUTH_CLIENTID,
+  //   androidClientId: GOOGLE_AUTH_CLIENTID_ANDROID,
+  // });
+  // useEffect(() => {
+  //   if (response?.type === 'success') {
+  //     const { authentication } = response;
+  //     axios.get(url + authentication.accessToken).then((res) => {
+  //       console.log(res.data);
 
-        setItem('JWT', res.data.jwtToken);
-        // if (res.data.isFirst) navigation.navigate('InitUserInfo');
-        if (true) navigation.navigate('InitUserInfo');
-        else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
-      });
+  //       setItem('JWT', res.data.jwtToken);
+  //       // if (res.data.isFirst) navigation.navigate('InitUserInfo');
+  //       if (true) navigation.navigate('InitUserInfo');
+  //       else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+  //     });
+  //   }
+  // }, [response]);
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: GOOGLE_AUTH_CLIENTID,
+    });
+  }, []);
+
+  signIn = async () => {
+    try {
+      // await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const tokens = await GoogleSignin.getTokens();
+      if (userInfo.data.idToken) {
+        // console.log(userInfo.data);
+        console.log(tokens.accessToken);
+        console.log(userInfo.data.user.email);
+        GoogleSignin.signOut();
+        axios.get(url + tokens.accessToken).then((res) => {
+          setItem('JWT', res.data.jwtToken);
+          // // if (res.data.isFirst) navigation.navigate('InitUserInfo');
+          if (true) navigation.navigate('InitUserInfo');
+          // else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+        });
+      } else {
+        throw new Error('no ID token present!');
+      }
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (e.g. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+      } else {
+        // some other error happened
+      }
     }
-  }, [response]);
+  };
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -46,7 +87,7 @@ function Login({ navigation }) {
           { opacity: pressed ? 0.5 : 1.0, ...styles.btn, marginTop: 120 },
           styles.defaultStyling,
         ]}
-        onPress={() => promptAsync()}
+        onPress={() => signIn()}
       >
         <Image source={require('../assets/icon/google1.png')}></Image>
         <Text style={{ ...typo.bold, marginStart: 12 }}>구글로 시작하기</Text>
