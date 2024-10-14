@@ -3,8 +3,10 @@ import {
   useCameraDevice,
   Camera,
 } from 'react-native-vision-camera';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Pressable } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useEffect } from 'react';
+import theme from '../../assets/Theme';
 function CameraScreen() {
   const device = useCameraDevice('back');
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -27,7 +29,41 @@ function CameraScreen() {
       </View>
     );
   return (
-    <Camera style={StyleSheet.absoluteFill} device={device} isActive={true} />
+    <View style={styles.root}>
+      <View style={styles.upper}></View>
+      <Camera style={StyleSheet.absoluteFill} device={device} isActive={true} />
+      <View style={styles.bottom}>
+        <Pressable
+          style={({ pressed }) => [
+            { opacity: pressed ? 0.5 : 1.0 },
+            styles.defaultStyling,
+          ]}
+        >
+          <Icon name="circle" size={100} color={theme.white}></Icon>
+        </Pressable>
+      </View>
+    </View>
   );
 }
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  upper: {
+    position: 'absolute',
+    width: '100%',
+    height: 138,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    zIndex: 1,
+  },
+  bottom: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: 200,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    zIndex: 1,
+    alignItems: 'center',
+    paddingTop: 30,
+  },
+  circle: {},
+});
 export default CameraScreen;
