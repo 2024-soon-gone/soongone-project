@@ -90,9 +90,21 @@ public class PostService {
     }
 
     // Read all Posts
-    public List<PostDTO> getAllPosts() {
+    public List<PostWithImgDTO> getAllPosts() {
         List<PostEntity> posts = postRepository.findAll();
-        return posts.stream().map(PostDTO::from).toList();
+
+        // Map each PostEntity to PostWithImgDTO
+        return posts.stream().map(post -> {
+            // Fetch the associated image for each post
+            ImageEntity img = imageRepository.findByPostEntity_Id(post.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Image not found for PostEntity_Id: " + post.getId()));
+
+            // Return PostWithImgDTO combining the post and its image URI
+            return PostWithImgDTO.builder()
+                    .postDTO(PostDTO.from(post))
+                    .nftImgIpfsUri(img.getImgUrl())
+                    .build();
+        }).toList();
     }
 
     // Read a Post by ID
