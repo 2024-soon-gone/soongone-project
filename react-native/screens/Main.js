@@ -12,14 +12,14 @@ import HomeScreen from './Home/Home';
 import SearchScreen from './Search/Search';
 import TranscationScreen from './Transaction/Transaction';
 import ProfileScreen from './Profile/Profile';
-import CameraScreen from './Camera/Camera';
+import CameraStack from './Camera/CameraStack';
 
 const Tab = createBottomTabNavigator();
 
 function Main() {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="CameraStack"
       screenOptions={{
         tabBarActiveTintColor: theme.black,
         tabBarInactiveTintColor: theme.grey3,
@@ -60,8 +60,8 @@ function Main() {
         }}
       />
       <Tab.Screen
-        name="Camera"
-        component={CameraScreen}
+        name="CameraStack"
+        component={CameraStack}
         options={{
           title: '추가하기',
           tabBarIcon: ({ color, size }) => (

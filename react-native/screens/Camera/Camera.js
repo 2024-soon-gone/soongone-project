@@ -10,7 +10,7 @@ import theme from '../../assets/Theme';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import hasCameraRollPermission from '../../Utils/CameraRoll';
 
-function CameraScreen() {
+function CameraScreen({ navigation }) {
   const device = useCameraDevice('back');
   const { hasPermission, requestPermission } = useCameraPermission();
   const camera = useRef(null);
@@ -23,11 +23,15 @@ function CameraScreen() {
 
   const takePhoto = async () => {
     if (camera.current === null) return;
-    const photo = await camera.current.takeSnapshot();
+    const photo = await camera.current.takePhoto();
     console.log(photo);
 
     await CameraRoll.save(`file://${photo.path}`, {
       type: 'photo',
+    });
+
+    navigation.navigate('Mint', {
+      path: photo.path,
     });
   };
 
