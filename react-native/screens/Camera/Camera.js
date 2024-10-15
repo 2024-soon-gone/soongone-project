@@ -5,16 +5,31 @@ import {
 } from 'react-native-vision-camera';
 import { View, StyleSheet, Text, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import theme from '../../assets/Theme';
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
+import hasCameraRollPermission from '../../Utils/CameraRoll';
+
 function CameraScreen() {
   const device = useCameraDevice('back');
   const { hasPermission, requestPermission } = useCameraPermission();
+  const camera = useRef(null);
   useEffect(() => {
     if (!hasPermission) {
       requestPermission();
     }
+    hasCameraRollPermission();
   }, []);
+
+  const takePhoto = async () => {
+    if (camera.current === null) return;
+    const photo = await camera.current.takeSnapshot();
+    console.log(photo);
+
+    await CameraRoll.save(`file://${photo.path}`, {
+      type: 'photo',
+    });
+  };
 
   if (!hasPermission)
     return (
@@ -31,13 +46,20 @@ function CameraScreen() {
   return (
     <View style={styles.root}>
       <View style={styles.upper}></View>
-      <Camera style={StyleSheet.absoluteFill} device={device} isActive={true} />
+      <Camera
+        style={StyleSheet.absoluteFill}
+        device={device}
+        isActive={true}
+        photo={true}
+        ref={camera}
+      />
       <View style={styles.bottom}>
         <Pressable
           style={({ pressed }) => [
             { opacity: pressed ? 0.5 : 1.0 },
             styles.defaultStyling,
           ]}
+          onPress={takePhoto}
         >
           <Icon name="circle" size={100} color={theme.white}></Icon>
         </Pressable>
