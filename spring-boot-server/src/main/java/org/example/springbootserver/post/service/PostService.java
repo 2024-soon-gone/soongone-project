@@ -3,6 +3,7 @@ package org.example.springbootserver.post.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.example.springbootserver.onchain.dto.NftMintResponseDTO;
 import org.example.springbootserver.onchain.service.NftService;
 import org.example.springbootserver.post.dto.PostDTO;
@@ -15,6 +16,8 @@ import org.example.springbootserver.post.repository.PostRepository;
 import org.example.springbootserver.user.entity.UserEntity;
 import org.example.springbootserver.user.exception.UserNotFoundException;
 import org.example.springbootserver.user.repository.UserRepository;
+import org.example.springbootserver.user.service.UserService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,31 +31,31 @@ public class PostService {
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final NftService nftService;
+    private final UserService userService;
 
     // Create a new Post
     public PostDTO createPost(PostRequestDTO postRequestDTO) {
+        String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
+
         String sampleNftAddress = "SAMPLE_NFT_ADDRESS";
         Long sampleNftId = -1L;
-        Long sampleGenUserId = 1L; // 추후에 Post의 genUserId와 ownerUserId를 Wallet Address로 검토하는 것을 고려해야..
-        Long sampleOwnerUserId = 1L;
         Long initLikes = 0L;
         Long initComments = 0L;
 
-        UserEntity sampleGenUser = userRepository.findById(sampleGenUserId)
-                .orElseThrow(() -> new UserNotFoundException(sampleGenUserId));
+//        UserEntity existingUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier)
+//                .orElseThrow(() -> new UserNotFoundException(sessionSocialUserIdentifier));
 
-        UserEntity sampleOwnerUser = userRepository.findById(sampleOwnerUserId)
-                .orElseThrow(() -> new UserNotFoundException(sampleOwnerUserId));
+        UserEntity currentUser = userService.getCurrentUserEntity();
 
         PostEntity postEntity = PostEntity.builder()
                 .nftAddress(sampleNftAddress)
                 .nftId(sampleNftId)
                 .text(postRequestDTO.getText())
-                .genUserEntity(sampleGenUser)
+                .genUserEntity(currentUser)
                 .location(postRequestDTO.getLocation())
                 .likes(initLikes)
                 .commentCounts(initComments)
-                .ownerUserId(sampleOwnerUser)
+                .ownerUserId(currentUser)
                 .build();
 
         PostEntity post = postRepository.save(postEntity);
@@ -61,10 +64,8 @@ public class PostService {
 
     @Transactional
     public NftMintResponseDTO postImage(MultipartFile image) throws IOException {
-        // Retrieve the current user - assuming you have a method to get the logged-in user's ID
-        Long sampleUserId = 1L;  // Replace with actual logic for current user
-        UserEntity currentUser = userRepository.findById(sampleUserId)
-                .orElseThrow(() -> new UserNotFoundException(sampleUserId));
+
+        UserEntity currentUser = userService.getCurrentUserEntity();
 
         // Fetch the most recent post created by the user
         PostEntity latestPost = postRepository.findTopByGenUserEntityOrderByCreatedAtDesc(currentUser)
@@ -122,7 +123,16 @@ public class PostService {
     }
 
     // Update a Post
-    public PostDTO updatePost(Long id, PostRequestDTO updatedPostDTO) {
+    public PostDTO updatePost(Long id, PostRequestDTO updatedPostDTO) throws UserNotFoundException, IllegalArgumentException {
+
+        UserEntity currentUser = userService.getCurrentUserEntity();
+        PostEntity targetPost = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
+
+        if (!currentUser.getId().equals(targetPost.getGenUserEntity().getId())) {
+            throw new UserNotFoundException("Current User is not the owner of the post: " + id);
+        }
+
         PostEntity updatedPostEntity = postRepository.findById(id)
                 .map(post -> {
                     post.setText(updatedPostDTO.getText());
@@ -135,11 +145,16 @@ public class PostService {
         return PostDTO.from(updatedPostEntity);
     }
 
-
     // Delete a Post by ID
-    public String deletePost(Long id) {
-        postRepository.findById(id)
+    public String deletePost(Long id) throws UserNotFoundException, IllegalArgumentException {
+        UserEntity currentUser = userService.getCurrentUserEntity();
+        PostEntity targetPost = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
+
+        if (!currentUser.getId().equals(targetPost.getGenUserEntity().getId())) {
+            throw new UserNotFoundException("Current User is not the owner of the post: " + id);
+        }
+
         postRepository.deleteById(id);
         return "Post deleted successfully";
     }

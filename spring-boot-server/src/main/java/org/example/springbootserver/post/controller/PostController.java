@@ -6,6 +6,7 @@ import org.example.springbootserver.onchain.service.NftService;
 import org.example.springbootserver.post.dto.PostDTO;
 import org.example.springbootserver.post.dto.PostRequestDTO;
 import org.example.springbootserver.post.dto.PostWithImgDTO;
+import org.example.springbootserver.post.exception.UserPostNotOwnedException;
 import org.example.springbootserver.post.service.PostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,9 +60,9 @@ public class PostController {
 
     // Update a Post
     @PutMapping("/{id}")
-    public ResponseEntity<PostDTO> updatePost(
+    public ResponseEntity<PostDTO> updatePost (
             @PathVariable Long id,
-            @RequestBody PostRequestDTO updatedPostRequest) {
+            @RequestBody PostRequestDTO updatedPostRequest) throws UserPostNotOwnedException, IllegalArgumentException {
         try {
             PostDTO post = postService.updatePost(id, updatedPostRequest);
             return new ResponseEntity<>(post, HttpStatus.OK);
@@ -72,7 +73,7 @@ public class PostController {
 
     // Delete a Post
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePost(@PathVariable Long id) throws UserPostNotOwnedException, IllegalArgumentException {
         try {
             postService.deletePost(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
