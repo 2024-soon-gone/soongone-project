@@ -56,7 +56,7 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
     // NFT Collection => (NFT ID => Bid Active)
     mapping(address => mapping(uint256 => bool)) private bidState;
 
-    function isContract(address _addr) private view returns (bool) {
+    function isContract(address _addr) public view returns (bool) {
         uint256 size;
         assembly {
             size := extcodesize(_addr)
@@ -191,7 +191,7 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
         );
         // Check if endTime is not passed
         require(
-             block.timestamp > bidToAccept.endTime,
+             block.timestamp < bidToAccept.endTime,
             "Bid's endTime is already timeout"
         );
         // Check if the original bidder has enough Payment Token Amount in current time period
@@ -203,7 +203,7 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
 
         // If a approval of MarketPlace.sol on ERC20, ERC721 are not met => below process will fail
         // Transfer of Payment Token
-        paymentToken.transferFrom(bidToAccept.bidder,msg.sender,bidToAccept.amountPaymentToken);
+        paymentToken.transferFrom(bidToAccept.bidder, msg.sender, bidToAccept.amountPaymentToken);
 
         // Transfer of owner ship of NFT
         nftContract.safeTransferFrom(msg.sender,bidToAccept.bidder,_nftId);
@@ -241,7 +241,7 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
         );
         // Check if bid is already opened -> Is this require() necessary?
         require(
-            bidState[_addressNFTCollection][_nftId] == true,
+            bidState[_addressNFTCollection][_nftId] == false,
             "Bidding is already Activated"
         );
 
@@ -278,7 +278,7 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
         );
         // - check if bid is already opened
         require(
-            bidState[_addressNFTCollection][_nftId] == false,
+            bidState[_addressNFTCollection][_nftId] == true,
             "Bidding is already DeActivated"
         );
 
@@ -351,6 +351,7 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
     }
 
     //계정이(if _addressAccount == 0x0 All Bids) 제안한 Bids를 모두(address == 0x0) 혹은 NFT Collection Address를 매개로
+    // WIP
     function getAccountBids(
         address _addressAccount,
         address _addressNFTCollection

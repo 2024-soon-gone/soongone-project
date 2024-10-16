@@ -26,6 +26,13 @@ public class JWTFilter extends OncePerRequestFilter {
         String authorization = null;
         Cookie[] cookies = request.getCookies();
 
+        // Skip JWT validation for public endpoints
+        String path = request.getRequestURI();
+        if (path.equals("/") || path.equals("/oauth2Verify")) {
+            filterChain.doFilter(request, response);
+            return; // Skip the rest of the filter
+        }
+
         if(cookies ==  null) {
             System.out.println("User has no Cookies Set !~!!!!!!!!!!!!!!!!");
             filterChain.doFilter(request, response);
@@ -39,6 +46,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
                 authorization = cookie.getValue();
             }
+            System.out.println("Authorization: " + authorization);
+            System.out.println(jwtUtil.getUsername(authorization));
         }
 
         //Authorization 헤더 검증
