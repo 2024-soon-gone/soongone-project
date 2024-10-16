@@ -41,7 +41,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         for (Cookie cookie : cookies) {
 
-            System.out.println(cookie.getName());
+//            System.out.println(cookie.getName());
             if (cookie.getName().equals("Authorization")) {
 
                 authorization = cookie.getValue();
@@ -80,6 +80,7 @@ public class JWTFilter extends OncePerRequestFilter {
         //userDTO를 생성하여 값 set
         Token2OAuthDTO token2OAuthDTO = new Token2OAuthDTO();
         token2OAuthDTO.setSocialUserIdentifier(userSocialIdentifier);
+        token2OAuthDTO.setName(userSocialIdentifier);
         token2OAuthDTO.setRole(role);
 
         //UserDetails에 회원 정보 객체 담기

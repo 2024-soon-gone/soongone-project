@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootserver.customOAuth2.dto.*;
 import org.example.springbootserver.user.entity.UserEntity;
+import org.example.springbootserver.user.exception.UserNotFoundException;
 import org.example.springbootserver.user.repository.OAuthUserRepository;
 import org.example.springbootserver.user.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +74,7 @@ public class oauth2TokenService {
         String sociaUserIdenfier = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
 
         // UserName(Unique한 식별자)을 통해 사용자의 정보 존재 여부를 Jpa를 통해 확인한다.
-        UserEntity existData = userRepository.findBySocialUserIdentifier(sociaUserIdenfier);
+        UserEntity existData = userRepository.findBySocialUserIdentifier(sociaUserIdenfier).orElseThrow(() -> new UserNotFoundException(sociaUserIdenfier));
 
         if (existData == null) { // 기존 유저가 존재하지 않는다면
 
