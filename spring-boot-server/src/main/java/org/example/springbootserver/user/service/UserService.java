@@ -10,6 +10,8 @@ import org.example.springbootserver.user.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -33,9 +35,6 @@ public class UserService {
         }
 
         // Fetch the existing user from the repository
-//        UserEntity existingUser = userRepository.findById(id)
-//                .orElseThrow(() -> new UserNotFoundException(id));
-
         UserEntity existingUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier).orElseThrow(() -> new UserNotFoundException(sessionSocialUserIdentifier));
 
         // Update only the allowed fields
@@ -49,5 +48,18 @@ public class UserService {
         userRepository.save(existingUser);
 
         return UserDTO.from(existingUser);
+    }
+    
+//    public Optional<UserEntity> getCurrentUserEntity() {
+//        String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
+//        Optional<UserEntity> currentUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier);
+//        return currentUser;
+//    }
+
+    public UserEntity getCurrentUserEntity() throws UserNotFoundException{
+        String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserEntity currentUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier)
+                .orElseThrow(() -> new UserNotFoundException(sessionSocialUserIdentifier));
+        return currentUser;
     }
 }
