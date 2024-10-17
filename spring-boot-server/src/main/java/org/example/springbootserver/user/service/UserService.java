@@ -38,6 +38,7 @@ public class UserService {
         UserEntity existingUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier).orElseThrow(() -> new UserNotFoundException(sessionSocialUserIdentifier));
 
         // Update only the allowed fields
+        existingUser.setAccountId(userDTO.getAccountId());
         existingUser.setName(userDTO.getName());
         existingUser.setBirthDay(userDTO.getBirthDay());
         existingUser.setGender(userDTO.getGender() != null ? Gender.valueOf(userDTO.getGender()) : null);
