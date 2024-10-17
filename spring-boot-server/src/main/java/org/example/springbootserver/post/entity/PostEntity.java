@@ -5,6 +5,9 @@ import lombok.*;
 import org.example.springbootserver.user.entity.BaseEntity;
 import org.example.springbootserver.user.entity.UserEntity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @RequiredArgsConstructor
@@ -29,7 +32,7 @@ public class PostEntity extends BaseEntity {
 
     // After first set and never changed
     @ManyToOne
-    private UserEntity genUserId;
+    private UserEntity genUserEntity;
 //    private Long genUserId;
 
     private String location;
@@ -40,5 +43,7 @@ public class PostEntity extends BaseEntity {
 
     @ManyToOne
     private UserEntity ownerUserId;
-//    private Long ownerUserId;
+
+    @OneToMany(mappedBy = "postEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ImageEntity> images = new ArrayList<>();
 }

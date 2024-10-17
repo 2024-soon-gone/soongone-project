@@ -24,5 +24,5 @@ public class ImageEntity extends BaseEntity {
 
     @NonNull
     @ManyToOne
-    private PostEntity postId;
+    private PostEntity postEntity;
 }

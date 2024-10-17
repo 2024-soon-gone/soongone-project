@@ -1,5 +1,6 @@
 require('@nomicfoundation/hardhat-toolbox');
-// require('@nomiclabs/hardhat-ethers');
+require('@nomicfoundation/hardhat-ethers');
+require('@nomicfoundation/hardhat-ignition-ethers'); // Ignition Module for Deploying Smart Contract
 require('dotenv').config();
 
 const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID;

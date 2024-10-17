@@ -22,5 +22,5 @@ public class UserPostLike extends BaseEntity {
 
     @NonNull
     @OneToOne
-    private PostEntity postId;
+    private PostEntity postEntity;
 }
