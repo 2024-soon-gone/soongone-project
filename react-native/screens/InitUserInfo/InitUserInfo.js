@@ -11,6 +11,9 @@ import BackButton from './Components/BackBtn';
 import NextButton from './Components/NextBtn';
 import DoneButton from './Components/DoneBtn';
 import Indicator from './Components/Indicator';
+import api from '../../Utils/API/Axios';
+import { BASEURL } from '@env';
+import { getItem } from '../../Utils/Storage/AsyncStorage';
 
 function InitUserInfo({ navigation }) {
   const [step, setStep] = useState(0);
@@ -18,7 +21,7 @@ function InitUserInfo({ navigation }) {
   const [userinfo, setUserinfo] = useState({
     id: '',
     name: '',
-    intro: '',
+    introduce: '',
     profileUrl: '',
   });
   const [input, setInput] = useState('');
@@ -58,7 +61,7 @@ function InitUserInfo({ navigation }) {
           setInput(userinfo.name);
           setUserinfo({
             ...userinfo,
-            intro: input,
+            introduce: input,
           });
           break;
         case 3:
@@ -77,7 +80,7 @@ function InitUserInfo({ navigation }) {
         case 0:
           setUserinfo({
             ...userinfo,
-            id: input,
+            accountId: input,
           });
           setInput(userinfo.name);
           setActivated(userinfo.name);
@@ -93,7 +96,7 @@ function InitUserInfo({ navigation }) {
         case 2:
           setUserinfo({
             ...userinfo,
-            intro: input,
+            introduce: input,
           });
           setActivated(false);
           break;
@@ -104,14 +107,41 @@ function InitUserInfo({ navigation }) {
       console.log(userinfo);
     }
   };
-  const onDonePress = () => {
-    // TODO: backend에 유저 정보 전달
+  const onDonePress = async () => {
     const DoneUserinfo = {
       ...userinfo,
-      intro: input,
+      introduce: input,
     };
-    console.log(DoneUserinfo);
-    navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+    await api.interceptors.request.use(
+      async (config) => {
+        const accessToken = await getItem('JWT');
+
+        try {
+          if (accessToken) {
+            config.headers['Authorization'] = `Bearer ${accessToken}`;
+            console.log('header ' + accessToken);
+          }
+          return config;
+        } catch (err) {
+          console.error(
+            '[_axios.interceptors.request] config : ' + err.message,
+          );
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      },
+    );
+    api
+      .post(`/users/updateInfo`, DoneUserinfo)
+      .then((res) => {
+        console.log(res.data);
+        navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (

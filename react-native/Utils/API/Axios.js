@@ -13,7 +13,7 @@ const instance = axios.create({
 
 instance.interceptors.request.use(
   (config) => {
-    const accessToken = getItem('accessToken');
+    const accessToken = getItem('JWT');
 
     try {
       if (accessToken) {

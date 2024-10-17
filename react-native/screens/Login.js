@@ -12,6 +12,7 @@ import Logo from '../assets/logo.svg';
 import typo from '../assets/Typograph';
 import theme from '../assets/Theme';
 import axios from 'axios';
+import api from '../Utils/API/Axios';
 import { setItem, getItem } from '../Utils/Storage/AsyncStorage';
 import {
   GoogleSignin,
@@ -22,30 +23,13 @@ WebBrowser.maybeCompleteAuthSession();
 
 function Login({ navigation }) {
   const url = `${BASEURL}/oauth2Verify?provider=google&accessToken=`;
-  // const [request, response, promptAsync] = Google.useAuthRequest({
-  //   webClientId: GOOGLE_AUTH_CLIENTID,
-  //   androidClientId: GOOGLE_AUTH_CLIENTID_ANDROID,
-  // });
-  // useEffect(() => {
-  //   if (response?.type === 'success') {
-  //     const { authentication } = response;
-  //     axios.get(url + authentication.accessToken).then((res) => {
-  //       console.log(res.data);
-
-  //       setItem('JWT', res.data.jwtToken);
-  //       // if (res.data.isFirst) navigation.navigate('InitUserInfo');
-  //       if (true) navigation.navigate('InitUserInfo');
-  //       else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
-  //     });
-  //   }
-  // }, [response]);
   useEffect(() => {
     const checkAndSignIn = async () => {
       const jwt = await getItem('JWT');
-      if (jwt !== '') {
-        console.log(jwt);
-        navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
-      }
+      // if (jwt !== '') {
+      //   console.log(jwt);
+      //   navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+      // }
       GoogleSignin.configure({
         webClientId: GOOGLE_AUTH_CLIENTID,
       });
@@ -65,7 +49,11 @@ function Login({ navigation }) {
         GoogleSignin.signOut();
         axios.get(url + tokens.accessToken).then((res) => {
           setItem('JWT', res.data.jwtToken);
-
+          console.log('JWT Response: ', res.data.jwtToken);
+          api.interceptors.request.use((config) => {
+            config.headers.Authorization = 'Bearer ' + res.data.jwtToken;
+            return config;
+          });
           if (res.data.isFirst) navigation.navigate('InitUserInfo');
           else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
         });
