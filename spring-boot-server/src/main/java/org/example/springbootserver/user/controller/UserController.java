@@ -22,9 +22,9 @@ public class UserController {
     }
 
     // POST controller to update user information
-    @PostMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUserInfo(@PathVariable Long id, @RequestBody UserDTO userDTO) {
-        UserDTO updatedUserDTO = userService.updateUserInfo(id, userDTO);
+    @PostMapping("/updateInfo")
+    public ResponseEntity<UserDTO> updateUserInfo(@RequestBody UserDTO userDTO) {
+        UserDTO updatedUserDTO = userService.updateUserInfo(userDTO);
         return ResponseEntity.ok(updatedUserDTO);
     }
 

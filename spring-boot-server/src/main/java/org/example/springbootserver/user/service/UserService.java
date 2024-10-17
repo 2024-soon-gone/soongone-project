@@ -26,7 +26,7 @@ public class UserService {
     }
 
     // Method to update user information
-    public UserDTO updateUserInfo(Long id, UserDTO userDTO) {
+    public UserDTO updateUserInfo(UserDTO userDTO) {
         String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
         // Check if any forbidden fields are being updated
         if (userDTO.getSocialUserIdentifier() != null || userDTO.getEmail() != null ||
@@ -49,12 +49,6 @@ public class UserService {
 
         return UserDTO.from(existingUser);
     }
-    
-//    public Optional<UserEntity> getCurrentUserEntity() {
-//        String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Optional<UserEntity> currentUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier);
-//        return currentUser;
-//    }
 
     public UserEntity getCurrentUserEntity() throws UserNotFoundException{
         String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();

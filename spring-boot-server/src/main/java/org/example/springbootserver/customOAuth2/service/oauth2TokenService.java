@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,19 +32,19 @@ public class oauth2TokenService {
 
     public void verifyAccessToken(String provider, String accessToken, HttpServletResponse response) throws OAuth2AuthenticationException, IOException {
 
-        if(provider == null){
+        if (provider == null) {
             System.out.println("Provider is null");
-            OAuth2AuthenticationException providerIsNull = new OAuth2AuthenticationException("Provider is null");
-            throw providerIsNull;
+            throw new OAuth2AuthenticationException("Provider is null");
         }
+
         String url;
 
         if ("google".equals(provider)) {
-            // Define the Google API URL with the access token
             url = "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + accessToken;
         } else {
             throw new OAuth2AuthenticationException("Provider is not supported");
         }
+
         // Use RestTemplate to send a GET request to the Google API
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> tokenVerifiedResponse = restTemplate.getForEntity(url, String.class);
@@ -61,48 +62,47 @@ public class oauth2TokenService {
         }
 
         OAuth2Response oAuth2Response = null;
-        // Current Manual Access Token Verification only available for Google
-         if (provider.equals("google")) {
-
+        if ("google".equals(provider)) {
             oAuth2Response = new GoogleResponse(googleUserAttributes);
-        }
-        else {
+        } else {
             throw new OAuth2AuthenticationException("Provider is not supported");
         }
 
-        //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만듬
-        String sociaUserIdenfier = oAuth2Response.getProvider()+" "+oAuth2Response.getProviderId();
+        // Create the social user identifier
+        String sociaUserIdenfier = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
 
-        // UserName(Unique한 식별자)을 통해 사용자의 정보 존재 여부를 Jpa를 통해 확인한다.
-        UserEntity existData = userRepository.findBySocialUserIdentifier(sociaUserIdenfier).orElseThrow(() -> new UserNotFoundException(sociaUserIdenfier));
+        // Attempt to find the user by social user identifier
+        Optional<UserEntity> existUserOptional = userRepository.findBySocialUserIdentifier(sociaUserIdenfier);
 
-        if (existData == null) { // 기존 유저가 존재하지 않는다면
-
-            // User
-            UserEntity userEntity = new UserEntity();
-            userEntity = createNewUser(oAuth2Response);
-            userRepository.save(userEntity);
-
+        if (existUserOptional.isEmpty()) { // If user does not exist
+            // Create a new user
+            UserEntity newUser = createNewUser(oAuth2Response);
+            userRepository.save(newUser);
 
             Token2OAuthDTO token2OAuthDTO = new Token2OAuthDTO();
             token2OAuthDTO.setSocialUserIdentifier(sociaUserIdenfier);
             token2OAuthDTO.setName(oAuth2Response.getName());
             token2OAuthDTO.setRole("ROLE_USER");
 
-            onTokenVerificationSuccess(response,new CustomOAuth2User(token2OAuthDTO), true);
+            // Handle successful token verification for a new user
+            onTokenVerificationSuccess(response, new CustomOAuth2User(token2OAuthDTO), true);
 
-        }
-        else{ // 기존 유저가 존재한다면
-            updateUser(existData, oAuth2Response);
+        } else { // If user exists
+            UserEntity existUser = existUserOptional.get(); // Retrieve the existing user
+
+            // Update the user information
+            updateUser(existUser, oAuth2Response);
 
             Token2OAuthDTO token2OAuthDTO = new Token2OAuthDTO();
             token2OAuthDTO.setSocialUserIdentifier(sociaUserIdenfier);
             token2OAuthDTO.setName(oAuth2Response.getName());
-            token2OAuthDTO.setRole(existData.getRole());
+            token2OAuthDTO.setRole(existUser.getRole());
 
-            onTokenVerificationSuccess(response,new CustomOAuth2User(token2OAuthDTO), false);
+            // Handle successful token verification for an existing user
+            onTokenVerificationSuccess(response, new CustomOAuth2User(token2OAuthDTO), false);
         }
     }
+
 
     public void onTokenVerificationSuccess(HttpServletResponse response, CustomOAuth2User customOAuth2User, boolean isFirst) throws IOException {
         String socialUserIdentifier = customOAuth2User.getSocialUserIdentifier();
