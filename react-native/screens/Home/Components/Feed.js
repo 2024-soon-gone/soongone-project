@@ -13,27 +13,26 @@ import Heart from '../../../assets/icon/heart';
 
 const WINDOW_WIDTH = Dimensions.get('window').width;
 
-const Feed = ({ profileUrl, userId, imageUrl, likes, comments }) => {
+const Feed = ({ accountId, imageUrl, likes, comments, text }) => {
   return (
     <View style={styles.root}>
       <View style={styles.header}>
-        <Image style={styles.profileImg} />
-        <Text style={typo.body}>{'userId'}</Text>
+        <Image
+          style={styles.profileImg}
+          source={require('../../../assets/profileDefault.png')}
+        />
+        <Text style={typo.body}>{accountId}</Text>
       </View>
-      <Image style={styles.mainImg}></Image>
+      <Image style={styles.mainImg} source={{ uri: imageUrl }}></Image>
       <View style={styles.likeComment}>
         <Heart style={{ marginTop: 4 }}></Heart>
-        {!likes && <Text style={styles.numbers}>{70}</Text>}
+        {!likes && <Text style={styles.numbers}>{likes}</Text>}
         <Bubble style={{ marginLeft: 12, marginTop: 4 }}></Bubble>
-        {!comments && <Text style={styles.numbers}>{153}</Text>}
+        {!comments && <Text style={styles.numbers}>{comments}</Text>}
       </View>
       <View style={{ display: 'inline' }}>
         <Text style={typo.bold}>{'soongone_'}</Text>
-        <Text style={typo.body}>
-          {
-            '순간 @soongone_ 과 함께 순간과 함께순간과 함께 순간과 함께 순간과 함께 순간과 함께 순간...'
-          }
-        </Text>
+        <Text style={typo.body}>{text}</Text>
       </View>
       <Pressable>
         <Text style={{ ...typo.label_light, color: theme.grey4 }}>
@@ -58,15 +57,15 @@ const styles = StyleSheet.create({
   profileImg: {
     width: 32,
     height: 32,
-    borderRadius: 10,
+    borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: theme.blue3,
+    backgroundColor: 'black',
+    resizeMode: 'contain',
     marginEnd: 8,
   },
   mainImg: {
     height: WINDOW_WIDTH * 0.9,
     width: WINDOW_WIDTH * 0.9,
-    backgroundColor: theme.black,
     marginBottom: 8,
   },
   likeComment: {

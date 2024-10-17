@@ -1,10 +1,21 @@
 import { View, Button, Text, StyleSheet, ScrollView } from 'react-native';
+import { useEffect, useState } from 'react';
 import Logo from '../../assets/icon/logo-literal';
 import Bell from '../../assets/icon/bell';
 import theme from '../../assets/Theme';
 import Feed from './Components/Feed';
+import api from '../../Utils/API/Axios';
 
 const Home = () => {
+  const [feeds, setFeeds] = useState([]);
+
+  useEffect(() => {
+    api.get('/post').then((res) => {
+      console.log(`feeds count: ${res.data.length}`);
+      setFeeds(res.data);
+    });
+  }, []);
+
   return (
     <View style={styles.root}>
       <View style={styles.header}>
@@ -12,9 +23,18 @@ const Home = () => {
         <Bell />
       </View>
       <ScrollView>
-        <Feed />
-        <Feed />
-        <Feed />
+        {feeds.map((feed) => {
+          return (
+            <Feed
+              accountId={feed.postDTO.ownerUser.accountId}
+              imageUrl={feed.nftImgIpfsUri}
+              likes={feed.postDTO.likes}
+              comments={feed.postDTO.comments}
+              text={feed.postDTO.text}
+              key={feed.postDTO.id}
+            />
+          );
+        })}
       </ScrollView>
     </View>
   );
