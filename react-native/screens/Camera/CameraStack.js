@@ -7,7 +7,7 @@ export default function CameraStack() {
   const Stack = createStackNavigator();
   return (
     <Stack.Navigator
-      initialRouteName="Mint"
+      initialRouteName="Camera"
       screenOptions={{
         headerShown: false,
         headerTitleAlign: 'center',

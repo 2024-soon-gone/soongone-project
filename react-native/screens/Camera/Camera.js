@@ -23,7 +23,7 @@ function CameraScreen({ navigation }) {
 
   const takePhoto = async () => {
     if (camera.current === null) return;
-    const photo = await camera.current.takePhoto();
+    const photo = await camera.current.takeSnapshot();
     console.log(photo);
 
     await CameraRoll.save(`file://${photo.path}`, {

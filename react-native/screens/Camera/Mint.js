@@ -9,11 +9,51 @@ import {
 } from 'react-native';
 import theme from '../../assets/Theme';
 import DoneButton from './Component/DoneBtn';
+import api from '../../Utils/API/Axios';
+import { useState } from 'react';
+import { BASEURL } from '@env';
+import { getItem } from '../../Utils/Storage/AsyncStorage';
 
 export default function MintScreen({ route }) {
-  const sendImgae = async () => {
-    const result = await fetch(`file://${file.path}`);
-    const data = await result.blob();
+  const [text, setText] = useState('');
+  const sendImgae = () => {
+    const path = route.params.path;
+    var filename = path.split('/');
+    filename = filename[filename.length - 1];
+    console.log(path);
+    console.log(filename);
+
+    api
+      .post('/post/createPost', {
+        text: text,
+        location: 'SKKU',
+      })
+      .then(async (res) => {
+        console.log('Create Post Done');
+
+        const formdata = new FormData();
+        formdata.append('image', {
+          uri: 'file://' + path,
+          type: 'image/jpeg',
+          name: filename + '.jpg',
+        });
+        console.log(
+          formdata.getParts().find((item) => item.fieldName === 'image'),
+        );
+
+        api
+          .post('/post/postImage?', formdata, {
+            headers: {
+              'Content-Type': 'multipart/form-data; boundary="boundary"',
+            },
+            transformRequest: (data) => data,
+          })
+          .then((res) => console.log(res.data))
+          .catch((err) => console.log(err));
+      });
+
+    // TODO : 로딩 화면
+    //        Home 화면 이동 및 리프레시
   };
 
   return (
@@ -21,17 +61,20 @@ export default function MintScreen({ route }) {
       <ScrollView style={{ width: '100%', marginBottom: 20 }}>
         <View style={{ alignItems: 'center' }}>
           <Image
-            //   source={{ uri: 'file://' + route.params.path }}
+            source={{ uri: 'file://' + route.params.path }}
             style={styles.image}
           />
           <TextInput
             style={styles.input}
             placeholder="지금 이 순간을 문구로 남겨보세요"
             multiline={true}
+            onChangeText={(input) => {
+              setText(input);
+            }}
           />
         </View>
       </ScrollView>
-      <DoneButton style={{ marginBottom: 20 }} />
+      <DoneButton style={{ marginBottom: 20 }} onPress={sendImgae} />
     </KeyboardAvoidingView>
   );
 }
