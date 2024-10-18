@@ -1,12 +1,13 @@
 import { View, Button, Text, StyleSheet, ScrollView } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useEffect, useState } from 'react';
 import Logo from '../../assets/icon/logo-literal';
 import Bell from '../../assets/icon/bell';
 import theme from '../../assets/Theme';
 import Feed from './Components/Feed';
 import api from '../../Utils/API/Axios';
 
-const Home = () => {
+const Home = ({ route }) => {
   const [feeds, setFeeds] = useState([]);
 
   useEffect(() => {
@@ -15,6 +16,20 @@ const Home = () => {
       setFeeds(res.data);
     });
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log(route.params);
+      if (route.params && route.params.refresh) {
+        api.get('/post').then((res) => {
+          console.log(`feeds count: ${res.data.length}`);
+          setFeeds(res.data);
+          route.params.refresh = false;
+        });
+      }
+      return;
+    }, [route]),
+  );
 
   return (
     <View style={styles.root}>

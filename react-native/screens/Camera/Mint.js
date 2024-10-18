@@ -6,6 +6,7 @@ import {
   TextInput,
   StyleSheet,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import theme from '../../assets/Theme';
 import DoneButton from './Component/DoneBtn';
@@ -14,16 +15,18 @@ import { useState } from 'react';
 import { BASEURL } from '@env';
 import { getItem } from '../../Utils/Storage/AsyncStorage';
 
-export default function MintScreen({ route }) {
+export default function MintScreen({ route, navigation }) {
   const [text, setText] = useState('');
-  const sendImgae = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const sendImage = async () => {
     const path = route.params.path;
     var filename = path.split('/');
     filename = filename[filename.length - 1];
     console.log(path);
     console.log(filename);
+    setIsLoading(true);
 
-    api
+    await api
       .post('/post/createPost', {
         text: text,
         location: 'SKKU',
@@ -48,12 +51,14 @@ export default function MintScreen({ route }) {
             },
             transformRequest: (data) => data,
           })
-          .then((res) => console.log(res.data))
+          .then((res) => {
+            console.log(res.data);
+            setIsLoading(false);
+            navigation.navigate('Camera');
+            navigation.navigate('Home', { refresh: true });
+          })
           .catch((err) => console.log(err));
       });
-
-    // TODO : 로딩 화면
-    //        Home 화면 이동 및 리프레시
   };
 
   return (
@@ -74,7 +79,12 @@ export default function MintScreen({ route }) {
           />
         </View>
       </ScrollView>
-      <DoneButton style={{ marginBottom: 20 }} onPress={sendImgae} />
+      <DoneButton style={{ marginBottom: 20 }} onPress={sendImage} />
+      {isLoading && (
+        <View style={styles.laodingView}>
+          <ActivityIndicator size={'large'}></ActivityIndicator>
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -99,5 +109,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     textAlignVertical: 'top',
+  },
+  laodingView: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
+    zIndex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
