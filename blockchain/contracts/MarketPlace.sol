@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol"; // For name, symbol, dec
 import "./interfaces/IMarketPlace.sol";
 
 contract MarketPlace is IERC721Receiver,  IMarketPlace{
+
+    string public name = "SoonGone Market Place";
     uint256 private constant PRECISION = 1e3;
     uint private constant FEE = 100; // FEE set to 100/1e3 = 10%, for Test env
     // Events
@@ -106,7 +108,7 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
         );
 
         // bidder should approve the MarketPlace as 'spender' for a bidded amount
-        paymentToken.approve(address(this),_bid.amountPaymentToken);
+        paymentToken.approve(address(this), _bid.amountPaymentToken);
 
         // If trying to approve the amount exceeding msg.sender's balance will be reverted
         // Thus below require() is not mandated
@@ -159,7 +161,9 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
             "msg.sender is not a bidder of this bid"
         );
          
-        delete bids[_addressNFTCollection][_nftId][_bidId];
+        // delete bids[_addressNFTCollection][_nftId][_bidId];
+        Bid storage bidToCancel = bids[_addressNFTCollection][_nftId][_bidId];
+        bidToCancel.endTime = 0; // if endTime == 0 => NFT SOLD
         
     }
 
@@ -175,7 +179,7 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
             "Invalid NFT Collection contract address"
         );
 
-        Bid memory bidToAccept = bids[_addressNFTCollection][_nftId][_bidId];
+        Bid storage bidToAccept = bids[_addressNFTCollection][_nftId][_bidId];
         ERC721 nftContract = ERC721(_addressNFTCollection);
         ERC20 paymentToken= ERC20(bidToAccept.addressPaymentToken);
 
@@ -218,6 +222,10 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
             _bidId
         );
 
+        // Delete Accepted Bid Logic
+        // delete bids[_addressNFTCollection][_nftId]; => missing trie node occurs
+        bidToAccept.endTime = 0; // if endTime == 0 => NFT SOLD
+        // Deactivate bidding on sold NFT
     }
 
     function activateBidding(
@@ -261,7 +269,7 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
     function deactivateBidding(
         address _addressNFTCollection,
         uint256 _nftId
-    ) external override{
+    ) public override{
         //Check is addresses are valid
         require(
             isContract(_addressNFTCollection),
@@ -373,6 +381,5 @@ contract MarketPlace is IERC721Receiver,  IMarketPlace{
         // Can add extra logic on ERC721 Received.
         return this.onERC721Received.selector;
     }
-
 
 }
