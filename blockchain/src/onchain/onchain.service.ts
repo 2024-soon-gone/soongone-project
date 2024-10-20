@@ -13,10 +13,10 @@ import { BidDto } from 'src/dto/trade-bid-dto';
 export class OnchainService {
   private readonly nftContractAddress;
   private readonly nftContract;
-  private readonly marketplaceAddress;
-  private readonly marketplaceContract;
+  private readonly tokenContractAddress;
+  private readonly tokenContract;
+
   private readonly adminPrivatekey;
-  private readonly ipfsApiJWT;
   private readonly provider;
   private readonly logger = new Logger(OnchainService.name);
   private readonly adminWallet;
@@ -26,10 +26,7 @@ export class OnchainService {
   // private readonly wallet = new ethers.Wallet(this.adminPrivatekey, this.provider);
   //   private readonly contract = new ethers.Contract(this.nftContractAddress, ['function mint(string name)'], this.wallet);
 
-  constructor(
-    private configService: ConfigService,
-    private httpService: HttpService,
-  ) {
+  constructor(private configService: ConfigService) {
     this.provider = this.configService.getProvider();
 
     this.nftContractAddress = this.configService.getNFTContractAddress();
@@ -39,15 +36,58 @@ export class OnchainService {
       this.provider,
     );
 
-    this.marketplaceAddress = this.configService.getMarketPlaceAddress();
-    this.marketplaceContract = new ethers.Contract(
-      this.marketplaceAddress,
-      this.configService.getMarketPlaceABI(),
+    this.tokenContractAddress = this.configService.getTokenContractAddress();
+    this.tokenContract = new ethers.Contract(
+      this.tokenContractAddress,
+      this.configService.getTokenContractABI(),
       this.provider,
     );
 
     this.adminPrivatekey = this.configService.getAdminPK();
-    this.ipfsApiJWT = this.configService.getIpfsJWT();
     this.adminWallet = new ethers.Wallet(this.adminPrivatekey, this.provider);
+  }
+  // SoGo.sol
+  async getAddressBalance(address: string): Promise<string> {
+    const balance = await this.tokenContract.balanceOf(address);
+    return balance;
+  }
+
+  async transfer(
+    addressTo: string,
+    amount: number,
+    userPrivateKey: string,
+  ): Promise<any> {
+    const reqUserWallet = new ethers.Wallet(userPrivateKey, this.provider);
+    const tx = await this.tokenContract
+      .connect(reqUserWallet)
+      .transfer(addressTo, amount);
+    await tx.wait();
+    return tx;
+  }
+
+  // SGNFT.sol
+  async getAddressNFTBalance(address: string): Promise<string> {
+    const balance = await this.nftContract.balanceOf(address);
+    return balance;
+  }
+
+  async getNftCollectionName(): Promise<string> {
+    const nftCollectionName = await this.nftContract.name();
+    return nftCollectionName;
+  }
+
+  async getNftCollectionOwner(): Promise<string> {
+    const nftCollectionOwner = await this.nftContract.owner();
+    return nftCollectionOwner;
+  }
+
+  async getNftOwner(nftId: number): Promise<string> {
+    const nftCollectionOwner = await this.nftContract.ownerOf(nftId);
+    return nftCollectionOwner;
+  }
+
+  async getTokenURI(nftId: number): Promise<string> {
+    const nftCollectionOwner = await this.nftContract.tokenURI(nftId);
+    return nftCollectionOwner;
   }
 }

@@ -16,7 +16,7 @@ export class TradeService {
   private readonly marketplaceAddress;
   private readonly marketplaceContract;
   private readonly adminPrivatekey;
-  private readonly ipfsApiJWT;
+
   private readonly provider;
   private readonly logger = new Logger(TradeService.name);
   private readonly adminWallet;
@@ -47,7 +47,6 @@ export class TradeService {
     );
 
     this.adminPrivatekey = this.configService.getAdminPK();
-    this.ipfsApiJWT = this.configService.getIpfsJWT();
     this.adminWallet = new ethers.Wallet(this.adminPrivatekey, this.provider);
   }
 
