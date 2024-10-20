@@ -106,7 +106,7 @@ public class oauth2TokenService {
 
     public void onTokenVerificationSuccess(HttpServletResponse response, CustomOAuth2User customOAuth2User, boolean isFirst) throws IOException {
         String socialUserIdentifier = customOAuth2User.getSocialUserIdentifier();
-        String jwtToken = jwtUtil.createJwt(socialUserIdentifier, "ROLE_USER", 1000*60*60*60L); // 3번째 인자는 JWT의 수명
+        String jwtToken = jwtUtil.createJwt(socialUserIdentifier, "ROLE_USER", 10000000*60*60*60L); // 3번째 인자는 JWT의 수명
 
         response.addCookie(createCookie("Authorization", jwtToken));
 

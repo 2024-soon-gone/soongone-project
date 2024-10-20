@@ -32,7 +32,7 @@ public class PostController {
     }
 
     @PostMapping("/postImage")
-    public ResponseEntity<NftMintResponseDTO> postImage(@RequestParam("image") MultipartFile file) throws IOException {
+    public ResponseEntity<NftMintResponseDTO> postImage(@RequestPart("image") MultipartFile file) throws IOException {
 //        String nftMintResponse = postService.postImage(file);
         NftMintResponseDTO nftMintResponse = postService.postImage(file);
         return new ResponseEntity<>(nftMintResponse, HttpStatus.CREATED);
