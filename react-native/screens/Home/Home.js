@@ -106,7 +106,7 @@ const Home = ({ route }) => {
             >
               <Text style={typo.H4}>거래 제안하기</Text>
               <Pressable onPress={() => setBidding(false)}>
-                <Icon name="cancel" size={28} color={theme.red3}></Icon>
+                <Icon name="cancel" size={28} color={theme.negative}></Icon>
               </Pressable>
             </View>
             <ScrollView styles={{ height: '90%', zIndex: 20 }}>
@@ -162,7 +162,10 @@ const Home = ({ route }) => {
                     scrollViewProps={{
                       nestedScrollEnabled: true,
                     }}
-                    style={{ minHeight: 10, borderWidth: 0 }}
+                    style={{
+                      minHeight: 10,
+                      borderWidth: 0,
+                    }}
                     maxHeight={200}
                     containerStyle={{
                       width: 150,
@@ -172,10 +175,12 @@ const Home = ({ route }) => {
                     textStyle={{
                       fontSize: 14,
                       fontFamily: 'Pretendard-Bold',
+                      textAlign: 'right',
                     }}
                     listItemContainerStyle={{
                       height: 30,
                     }}
+                    showTickIcon={false}
                   />
                 </View>
               </View>
