@@ -10,10 +10,19 @@ import theme from '../../../assets/Theme';
 import typo from '../../../assets/Typograph';
 import Bubble from '../../../assets/icon/bubble';
 import Heart from '../../../assets/icon/heart';
+import Deal from '../../../assets/icon/deal';
 
 const WINDOW_WIDTH = Dimensions.get('window').width;
 
-const Feed = ({ accountId, imageUrl, likes, comments, text }) => {
+const Feed = ({
+  postId,
+  accountId,
+  imageUrl,
+  likes,
+  comments,
+  text,
+  onBidPress,
+}) => {
   return (
     <View style={styles.root}>
       <View style={styles.header}>
@@ -29,6 +38,15 @@ const Feed = ({ accountId, imageUrl, likes, comments, text }) => {
         {!likes && <Text style={styles.numbers}>{likes}</Text>}
         <Bubble style={{ marginLeft: 12, marginTop: 4 }}></Bubble>
         {!comments && <Text style={styles.numbers}>{comments}</Text>}
+        <Pressable
+          style={({ pressed }) => {
+            return { opacity: pressed ? 0.5 : 1, ...styles.bid };
+          }}
+          onPress={() => onBidPress(postId)}
+          hitSlop={{ bottom: 50, left: 50, right: 50, top: 50 }}
+        >
+          <Deal stroke={'black'} strokeWidth="2" strokeLinejoin="round" />
+        </Pressable>
       </View>
       <View style={{ display: 'inline' }}>
         <Text style={typo.bold}>{'soongone_'}</Text>
@@ -76,6 +94,11 @@ const styles = StyleSheet.create({
   },
   numbers: {
     ...typo.body,
+  },
+  bid: {
+    marginTop: 4,
+    position: 'absolute',
+    right: 4,
   },
 });
 
