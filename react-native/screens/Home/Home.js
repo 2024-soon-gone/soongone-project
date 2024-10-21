@@ -1,4 +1,11 @@
-import { View, Button, Text, StyleSheet, ScrollView } from 'react-native';
+import {
+  View,
+  Button,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
 import Logo from '../../assets/icon/logo-literal';
@@ -9,11 +16,21 @@ import api from '../../Utils/API/Axios';
 
 const Home = ({ route }) => {
   const [feeds, setFeeds] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     api.get('/post').then((res) => {
       console.log(`feeds count: ${res.data.length}`);
       setFeeds(res.data);
+    });
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    api.get('/post').then((res) => {
+      console.log(`feeds count: ${res.data.length}`);
+      setFeeds(res.data);
+      setRefreshing(false);
     });
   }, []);
 
@@ -37,7 +54,11 @@ const Home = ({ route }) => {
         <Logo />
         <Bell />
       </View>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {feeds.map((feed) => {
           return (
             <Feed
