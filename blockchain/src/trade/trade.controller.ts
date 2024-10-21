@@ -227,7 +227,7 @@ export class TradeController {
 
   @Post('bid')
   async createBid(
-    @Body('BidRequest') bidRequest: BidDto,
+    @Body('bidRequest') bidRequest: BidDto,
     @Body('privateKey') privateKey: string,
     @Response() res: ExpressResponse, // Response 객체 추가
   ): Promise<any> {

@@ -11,6 +11,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -45,7 +46,7 @@ public class NftService {
         return responseEntity.getBody();
     }
 
-    public String nftMintRequest(String accountAddress, String name, String description, MultipartFile file) throws IOException {
+    public String nftMintRequest(String accountAddress, String name, String description, MultipartFile file) throws IOException, RestClientException {
         // Build the URI
         URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
                 .path("/nft/mint")
