@@ -187,6 +187,36 @@ public class TradeService {
         }
     }
 
+    public BidDTO getNFTBidInfoLocal( int nftId, int bidId) {
+        try {
+            URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
+                    .path("/trade/nft-bid-info/" + NFT_CONTRACT_ADDRESS + "/" + nftId + "/" + bidId)
+                    .encode()
+                    .build()
+                    .toUri();
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
+
+            // JSON 응답 파싱
+            Map<String, Object> responseMap = objectMapper.readValue(responseEntity.getBody(), HashMap.class);
+            Map<String, Object> bidInfoMap = (Map<String, Object>) ((Map<String, Object>) responseMap.get("data")).get("bidInfo");
+
+            // BidDTO로 변환
+            return BidDTO.builder()
+                    .addressNFTCollection((String) bidInfoMap.get("addressNFTCollection"))
+                    .nftId(Long.parseLong((String) bidInfoMap.get("nftId")))
+                    .addressPaymentToken((String) bidInfoMap.get("addressPaymentToken"))
+                    .amountPaymentToken(Long.parseLong((String) bidInfoMap.get("amountPaymentToken")))
+                    .endTime(Long.parseLong((String) bidInfoMap.get("endTime")))
+                    .bidder((String) bidInfoMap.get("bidder"))
+                    .build();
+        } catch (RestClientException | JsonProcessingException e) {
+            // 예외 발생 시 null 반환 또는 적절한 예외 처리
+            return null;
+        }
+    }
+
     public HttpResponseDTO<TransactionResponseDTO> activateBidding(int nftId) {
 
         try {
@@ -330,8 +360,9 @@ public class TradeService {
 
 
     // Accept a bid
-    public HttpResponseDTO<TransactionResponseDTO> acceptBid( int nftId, int bidId) {
+    public HttpResponseDTO<TransactionResponseDTO> acceptBid(int nftId, int bidId) {
         try {
+            // Step 1: Send HTTP request to accept the bid
             URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
                     .path("/trade/acceptBid/" + NFT_CONTRACT_ADDRESS + "/" + nftId + "/" + bidId)
                     .encode()
@@ -344,8 +375,6 @@ public class TradeService {
             // Fetch current user's private key
             UserEntity currentUser = userService.getCurrentUserEntity();
             String privateKey = currentUser.getWalletPrivateKey();
-
-            System.out.println("User PK fetched from DB : " + privateKey);
 
             // Create request body with the private key
             Map<String, String> requestBody = new HashMap<>();
@@ -369,7 +398,30 @@ public class TradeService {
             Map<String, Object> dataMap = (Map<String, Object>) responseMap.get("data");
             TransactionResponseDTO transactionResponse = TransactionResponseDTO.from(dataMap);
 
-            return new HttpResponseDTO<>("success", 200, "Bidding Accepted Successfully", transactionResponse, Instant.now());
+            // Step 2: Retrieve the bid information
+            BidDTO acceptedBid = getNFTBidInfoLocal(nftId, bidId);
+            if (acceptedBid == null) {
+                return new HttpResponseDTO<>("error", 500, "Failed to retrieve bid information", null, Instant.now());
+            }
+
+            // Step 3: Find the post by NFT ID
+            Optional<PostEntity> postOptional = postRepository.findByNftId(Long.valueOf(nftId));
+            if (postOptional.isEmpty()) {
+                return new HttpResponseDTO<>("error", 404, "Post not found", null, Instant.now());
+            }
+
+            // Step 4: Find the user by the bidder's address
+            UserEntity newOwner = userRepository.findByWalletAddress(acceptedBid.getBidder());
+            if (newOwner == null) {
+                return new HttpResponseDTO<>("error", 404, "User not found", null, Instant.now());
+            }
+
+            // Step 5: Update the post's owner and save the changes
+            PostEntity post = postOptional.get(); // Now that we know the post is present, we can safely get it
+            post.setOwnerUserId(newOwner);
+            postRepository.save(post);
+
+            return new HttpResponseDTO<>("success", 200, "Bidding Accepted and Owner Updated Successfully", transactionResponse, Instant.now());
         } catch (RestClientException e) {
             return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
         } catch (JsonProcessingException e) {
