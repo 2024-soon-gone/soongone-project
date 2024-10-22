@@ -9,6 +9,7 @@ public class BidResponseDTO {
     private BidDTO bidDTO;  // Composition with BidDTO
     private String bidderAccountId; // Additional field for bidder's name
     private String imgUrl;     // Additional field for image URL
+    private Long bidId;
 
     @Override
     public String toString() {
