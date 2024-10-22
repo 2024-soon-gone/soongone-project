@@ -18,6 +18,7 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import DecodingInfo from '../Utils/JWTDecoder';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -54,6 +55,8 @@ function Login({ navigation }) {
             config.headers.Authorization = 'Bearer ' + res.data.jwtToken;
             return config;
           });
+          const jwtInfo = DecodingInfo(res.data.jwtToken);
+          setItem('socialUserIdentifier', jwtInfo.username);
           if (res.data.isFirst) navigation.navigate('InitUserInfo');
           else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
         });

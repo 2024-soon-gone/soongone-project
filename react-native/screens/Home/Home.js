@@ -19,9 +19,11 @@ import { TextInput } from 'react-native-gesture-handler';
 import DropDownPicker from 'react-native-dropdown-picker';
 import BidDoneButton from './Components/BidDoneBtn';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { getItem } from '../../Utils/Storage/AsyncStorage';
 
 const Home = ({ route }) => {
   const [feeds, setFeeds] = useState([]);
+  const [mySocialId, setMySocialId] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [bidding, setBidding] = useState(false);
   const [open, setOpen] = useState(false);
@@ -37,6 +39,7 @@ const Home = ({ route }) => {
       console.log(`feeds count: ${res.data.length}`);
       setFeeds(res.data);
     });
+    getItem('socialUserIdentifier').then((socialId) => setMySocialId(socialId));
   }, []);
 
   const onRefresh = useCallback(() => {
@@ -89,6 +92,7 @@ const Home = ({ route }) => {
               key={feed.postDTO.id}
               onBidPress={onBidPress}
               postId={feed.postDTO.id}
+              isMine={mySocialId == feed.postDTO.ownerUser.socialUserIdentifier}
             />
           );
         })}

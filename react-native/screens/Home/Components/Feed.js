@@ -11,6 +11,11 @@ import typo from '../../../assets/Typograph';
 import Bubble from '../../../assets/icon/bubble';
 import Heart from '../../../assets/icon/heart';
 import Deal from '../../../assets/icon/deal';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
+import { useState, useEffect } from 'react';
+import { getItem } from '../../../Utils/Storage/AsyncStorage';
+import { api } from '../../../Utils/API/Axios';
 
 const WINDOW_WIDTH = Dimensions.get('window').width;
 
@@ -22,7 +27,22 @@ const Feed = ({
   comments,
   text,
   onBidPress,
+  isMine,
 }) => {
+  const [visible, setVisible] = useState(false);
+  const showMenu = () => setVisible(true);
+  const activateBid = () => {
+    setVisible(false);
+    console.log('거래 허용');
+  };
+  const deactivateBid = () => {
+    setVisible(false);
+    console.log('거래 거부');
+  };
+  const hideMenu = () => {
+    setVisible(false);
+  };
+
   return (
     <View style={styles.root}>
       <View style={styles.header}>
@@ -31,6 +51,18 @@ const Feed = ({
           source={require('../../../assets/profileDefault.png')}
         />
         <Text style={typo.body}>{accountId}</Text>
+        {isMine && (
+          <View style={{ position: 'absolute', right: 8 }}>
+            <Menu
+              visible={visible}
+              anchor={<Icon name="menu" size={24} onPress={showMenu} />}
+              onRequestClose={hideMenu}
+            >
+              <MenuItem onPress={activateBid}>거래 허용</MenuItem>
+              <MenuItem onPress={deactivateBid}>거래 거부</MenuItem>
+            </Menu>
+          </View>
+        )}
       </View>
       <Image style={styles.mainImg} source={{ uri: imageUrl }}></Image>
       <View style={styles.likeComment}>
