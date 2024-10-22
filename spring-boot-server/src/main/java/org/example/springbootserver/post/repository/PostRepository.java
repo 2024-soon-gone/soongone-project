@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
     Optional<PostEntity> findTopByGenUserEntityOrderByCreatedAtDesc(UserEntity currentUser);
     List<PostEntity> findAllByOwnerUserId(UserEntity currentUser); // Update to match field name
+    Optional<PostEntity>  findByNftId(Long nftId);
 }

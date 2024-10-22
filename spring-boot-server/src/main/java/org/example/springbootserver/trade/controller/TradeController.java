@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.springbootserver.global.dto.HttpResponseDTO;
 import org.example.springbootserver.onchain.dto.TransactionResponseDTO;
 import org.example.springbootserver.trade.dto.BidDTO;
+import org.example.springbootserver.trade.dto.BidResponseDTO;
 import org.example.springbootserver.trade.service.TradeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -117,14 +118,14 @@ public class TradeController {
 
     // Get all bids for an NFT owned by Current User
     @GetMapping("/nft-bids/received")
-    public ResponseEntity<HttpResponseDTO<Map<String, List<BidDTO>>>> getAllBidsReceived() {
-        HttpResponseDTO<Map<String, List<BidDTO>>> bids = tradeService.getAllBidsReceived();
+    public ResponseEntity<HttpResponseDTO<Map<String, List<BidResponseDTO>>>> getAllBidsReceived() {
+        HttpResponseDTO<Map<String, List<BidResponseDTO>>> bids = tradeService.getAllBidsReceived();
         return new ResponseEntity<>(bids, HttpStatus.OK);
     }
 
     @GetMapping("/nft-bids/proposed")
-    public ResponseEntity<HttpResponseDTO<Map<String, List<BidDTO>>>> getAllBidsProposedByUser() {
-        HttpResponseDTO<Map<String, List<BidDTO>>> bids = tradeService.getAllBidsProposedByUser();
+    public ResponseEntity<HttpResponseDTO<Map<String, List<BidResponseDTO>>>> getAllBidsProposedByUser() {
+        HttpResponseDTO<Map<String, List<BidResponseDTO>>> bids = tradeService.getAllBidsProposedByUser();
         return new ResponseEntity<>(bids, HttpStatus.OK);
     }
 }

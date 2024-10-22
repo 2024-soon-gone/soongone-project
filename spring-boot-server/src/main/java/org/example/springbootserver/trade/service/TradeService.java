@@ -11,7 +11,9 @@ import org.example.springbootserver.onchain.service.OnchainService;
 import org.example.springbootserver.post.entity.PostEntity;
 import org.example.springbootserver.post.repository.PostRepository;
 import org.example.springbootserver.trade.dto.BidDTO;
+import org.example.springbootserver.trade.dto.BidResponseDTO;
 import org.example.springbootserver.user.entity.UserEntity;
+import org.example.springbootserver.user.repository.UserRepository;
 import org.example.springbootserver.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,11 +44,13 @@ public class TradeService {
     private final UserService userService;
     private final OnchainService onchainService;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
-    public TradeService(UserService userService, OnchainService onchainService, PostRepository postRepository) {
+    public TradeService(UserService userService, OnchainService onchainService, PostRepository postRepository, UserRepository userRepository) {
         this.userService = userService;
         this.onchainService = onchainService;
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
         this.objectMapper = new ObjectMapper();
     }
     // Get marketplace name
@@ -337,10 +341,10 @@ public class TradeService {
     }
 
     // Get bids on an NFT
-    public HttpResponseDTO<Map<String, List<BidDTO>>> getAllBidsReceived() {
-        System.out.println("getAllBidsReceived actviated \n");
+    public HttpResponseDTO<Map<String, List<BidResponseDTO>>> getAllBidsReceived() {
+        System.out.printf("getAllBidsReceived activated \n");
         try {
-            // Retrieve the list of NFTs owned by the current user
+            // Retrieve the current user
             UserEntity currentUser = userService.getCurrentUserEntity();
             List<PostEntity> userOwnedPosts = postRepository.findAllByOwnerUserId(currentUser);
             Set<Long> ownedNftIds = userOwnedPosts.stream()
@@ -349,18 +353,18 @@ public class TradeService {
 
             if (ownedNftIds.isEmpty()) {
                 // If the user doesn't own any NFTs, return an empty response
-                return new HttpResponseDTO<>("success", 200, "No NFTs owned by the user", Map.of("bidsOnNFT", new ArrayList<BidDTO>()), Instant.now());
+                return new HttpResponseDTO<>("success", 200, "No NFTs owned by the user", Map.of("bidsOnNFT", new ArrayList<BidResponseDTO>()), Instant.now());
             }
 
             // Get the total count of NFTs
             Long nftCount = onchainService.getNftCountLocal();
 
             RestTemplate restTemplate = new RestTemplate();
-            List<BidDTO> allBidsForOwnedNFTs = new ArrayList<>();
+            List<BidResponseDTO> allBidsForOwnedNFTs = new ArrayList<>();
 
             // Loop through each NFT ID from 0 to nftCount-1
             for (long nftId = 0; nftId < nftCount; nftId++) {
-                System.out.println("Sending BC Http Request for nftID : " + nftId);
+                System.out.println("Sending BC Http Request for nftID: " + nftId);
                 URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
                         .path("/trade/nft-bids/" + NFT_CONTRACT_ADDRESS + "/" + nftId)
                         .encode()
@@ -385,13 +389,32 @@ public class TradeService {
                         .build()
                 ).toList();
 
-                // Add bids only for NFTs that the user owns
-                bidDTOList.stream()
-                        .filter(bid -> ownedNftIds.contains(bid.getNftId()))
-                        .forEach(allBidsForOwnedNFTs::add);
+                // Add bids only for NFTs that the user owns and map them to BidResponseDTO
+                for (BidDTO bidDTO : bidDTOList) {
+                    if (ownedNftIds.contains(bidDTO.getNftId())) {
+                        // Retrieve bidder name from UserEntity
+                        UserEntity bidder = userRepository.findByWalletAddress(bidDTO.getBidder());
+                        String bidderAccountId = bidder != null ? bidder.getAccountId() : "Unknown";
+
+                        // Retrieve post and image URL
+                        Optional<PostEntity> postEntityOptional = postRepository.findByNftId(bidDTO.getNftId());
+                        String imgUrl = postEntityOptional.isPresent() && !postEntityOptional.get().getImages().isEmpty()
+                                ? postEntityOptional.get().getImages().get(0).getImgUrl()
+                                : "No Image";
+
+                        // Build BidResponseDTO
+                        BidResponseDTO bidResponseDTO = BidResponseDTO.builder()
+                                .bidDTO(bidDTO)
+                                .bidderAccountId(bidderAccountId)
+                                .imgUrl(imgUrl)
+                                .build();
+
+                        allBidsForOwnedNFTs.add(bidResponseDTO);
+                    }
+                }
             }
 
-            Map<String, List<BidDTO>> data = new HashMap<>();
+            Map<String, List<BidResponseDTO>> data = new HashMap<>();
             data.put("bidsOnNFT", allBidsForOwnedNFTs);
 
             // Return success response
@@ -401,7 +424,7 @@ public class TradeService {
         }
     }
 
-    public HttpResponseDTO<Map<String, List<BidDTO>>> getAllBidsProposedByUser() {
+    public HttpResponseDTO<Map<String, List<BidResponseDTO>>> getAllBidsProposedByUser() {
         System.out.printf("getAllBidsPlacedByUser activated \n");
         try {
             // Retrieve the current user's wallet address
@@ -410,14 +433,14 @@ public class TradeService {
 
             if (userWalletAddress == null || userWalletAddress.isEmpty()) {
                 // If the user doesn't have a wallet address, return an empty response
-                return new HttpResponseDTO<>("success", 200, "User does not have a wallet address", Map.of("bidsPlacedByUser", new ArrayList<BidDTO>()), Instant.now());
+                return new HttpResponseDTO<>("success", 200, "User does not have a wallet address", Map.of("bidsPlacedByUser", new ArrayList<BidResponseDTO>()), Instant.now());
             }
 
             // Get the total count of NFTs
             Long nftCount = onchainService.getNftCountLocal();
 
             RestTemplate restTemplate = new RestTemplate();
-            List<BidDTO> allBidsPlacedByUser = new ArrayList<>();
+            List<BidResponseDTO> allBidsPlacedByUser = new ArrayList<>();
 
             // Loop through each NFT ID from 0 to nftCount-1
             for (long nftId = 0; nftId < nftCount; nftId++) {
@@ -447,12 +470,31 @@ public class TradeService {
                 ).toList();
 
                 // Add bids where the bidder matches the current user's wallet address
-                bidDTOList.stream()
-                        .filter(bid -> userWalletAddress.equalsIgnoreCase(bid.getBidder()))
-                        .forEach(allBidsPlacedByUser::add);
+                for (BidDTO bidDTO : bidDTOList) {
+                    if (userWalletAddress.equalsIgnoreCase(bidDTO.getBidder())) {
+                        // Retrieve bidder name from UserEntity
+                        UserEntity bidder = userRepository.findByWalletAddress(bidDTO.getBidder());
+                        String bidderAccountId = bidder != null ? bidder.getAccountId() : "Unknown";
+
+                        // Retrieve post and image URL
+                        Optional<PostEntity> postEntityOptional = postRepository.findByNftId(bidDTO.getNftId());
+                        String imgUrl = postEntityOptional.isPresent() && !postEntityOptional.get().getImages().isEmpty()
+                                ? postEntityOptional.get().getImages().get(0).getImgUrl()
+                                : "No Image";
+
+                        // Build BidResponseDTO
+                        BidResponseDTO bidResponseDTO = BidResponseDTO.builder()
+                                .bidDTO(bidDTO)
+                                .bidderAccountId(bidderAccountId)
+                                .imgUrl(imgUrl)
+                                .build();
+
+                        allBidsPlacedByUser.add(bidResponseDTO);
+                    }
+                }
             }
 
-            Map<String, List<BidDTO>> data = new HashMap<>();
+            Map<String, List<BidResponseDTO>> data = new HashMap<>();
             data.put("bidsPlacedByUser", allBidsPlacedByUser);
 
             // Return success response
