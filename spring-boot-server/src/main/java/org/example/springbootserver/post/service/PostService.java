@@ -17,6 +17,7 @@ import org.example.springbootserver.user.entity.UserEntity;
 import org.example.springbootserver.user.exception.UserNotFoundException;
 import org.example.springbootserver.user.repository.UserRepository;
 import org.example.springbootserver.user.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,22 +34,22 @@ public class PostService {
     private final NftService nftService;
     private final UserService userService;
 
+    @Value("${spring.blockchain-server.contract.NFT_CONTRACT_ADDRESS}")
+    private String NFT_CONTRACT_ADDRESS;
+
     // Create a new Post
     public PostDTO createPost(PostRequestDTO postRequestDTO) {
         String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        String sampleNftAddress = "SAMPLE_NFT_ADDRESS";
+//        String sampleNftAddress = "SAMPLE_NFT_ADDRESS";
         Long sampleNftId = -1L;
         Long initLikes = 0L;
         Long initComments = 0L;
 
-//        UserEntity existingUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier)
-//                .orElseThrow(() -> new UserNotFoundException(sessionSocialUserIdentifier));
-
         UserEntity currentUser = userService.getCurrentUserEntity();
 
         PostEntity postEntity = PostEntity.builder()
-                .nftAddress(sampleNftAddress)
+                .nftAddress(NFT_CONTRACT_ADDRESS)
                 .nftId(sampleNftId)
                 .text(postRequestDTO.getText())
                 .genUserEntity(currentUser)
@@ -82,8 +83,14 @@ public class PostService {
         // Assuming the response is in JSON format, parse it
         ObjectMapper objectMapper = new ObjectMapper();
         NftMintResponseDTO nftMintResponseDTO = objectMapper.readValue(nftMintResponse, NftMintResponseDTO.class);
-        String nftImgIpfsUri = nftMintResponseDTO.getNftImgIpfsUri();
 
+        Long nftId = nftMintResponseDTO.getNftId();
+
+        // Update the latestPost's nftId attribute
+        latestPost.setNftId(nftId); // Assuming the method exists in PostEntity
+        postRepository.save(latestPost); // Save the updated post
+
+        String nftImgIpfsUri = nftMintResponseDTO.getNftImgIpfsUri();
         ImageEntity newImage = new ImageEntity(nftImgIpfsUri, latestPost);
         imageRepository.save(newImage);
 
@@ -158,5 +165,7 @@ public class PostService {
         postRepository.deleteById(id);
         return "Post deleted successfully";
     }
+
+
 
 }

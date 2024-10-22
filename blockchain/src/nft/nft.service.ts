@@ -86,12 +86,17 @@ export class NftService {
     // Mint the NFT after successful IPFS uploads
     try {
       const tokenURI = 'ipfs://' + jsonIpfsHash;
+
+      const nftId = await this.nftContract._tokenIdCounter();
+      console.log('NFT ID : ', nftId);
+
       const transaction = await this.nftContract
         .connect(this.adminWallet)
         .safeMint(mintDto.accountAddress, tokenURI);
 
       // Wait for the transaction to be mined
       await transaction.wait();
+
       console.log(`NFT Minted with metadata: ${jsonIpfsHash}`);
 
       const imgIpfsUri = process.env.IPFS_FETCH_SUFFIX + '/' + imgIpfsHash;
@@ -104,6 +109,7 @@ export class NftService {
         nftIpfsHash: jsonIpfsHash,
         transactionHash: transaction.hash, // Include transaction details
         nftImgIpfsUri: imgIpfsUri,
+        nftId: nftId,
       };
     } catch (error) {
       throw new HttpException(

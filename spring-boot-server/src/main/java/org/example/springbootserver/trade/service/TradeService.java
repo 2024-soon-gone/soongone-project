@@ -2,10 +2,19 @@ package org.example.springbootserver.trade.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import net.minidev.json.JSONObject;
 import org.example.springbootserver.global.dto.HttpResponseDTO;
 import org.example.springbootserver.onchain.dto.TransactionResponseDTO;
+import org.example.springbootserver.onchain.service.OnchainService;
+import org.example.springbootserver.post.entity.PostEntity;
+import org.example.springbootserver.post.repository.PostRepository;
 import org.example.springbootserver.trade.dto.BidDTO;
+import org.example.springbootserver.trade.dto.BidResponseDTO;
+import org.example.springbootserver.user.entity.UserEntity;
+import org.example.springbootserver.user.repository.UserRepository;
+import org.example.springbootserver.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,18 +27,30 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+//@RequiredArgsConstructor
 public class TradeService {
 
     @Value("${spring.baseUrl.BC_SERVER_URL}")
     private String BC_SERVER_URL;
-    private final ObjectMapper objectMapper;
 
-    public TradeService() {
+    @Value("${spring.blockchain-server.contract.NFT_CONTRACT_ADDRESS}")
+    private String NFT_CONTRACT_ADDRESS;
+
+    private final ObjectMapper objectMapper;
+    private final UserService userService;
+    private final OnchainService onchainService;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
+
+    public TradeService(UserService userService, OnchainService onchainService, PostRepository postRepository, UserRepository userRepository) {
+        this.userService = userService;
+        this.onchainService = onchainService;
+        this.postRepository = postRepository;
+        this.userRepository = userRepository;
         this.objectMapper = new ObjectMapper();
     }
     // Get marketplace name
@@ -162,12 +183,11 @@ public class TradeService {
         }
     }
 
+    public HttpResponseDTO<TransactionResponseDTO> activateBidding(int nftId) {
 
-    // Activate bidding
-    public HttpResponseDTO<TransactionResponseDTO> activateBidding(String collection, int nftId, String privateKey) {
-        try{
+        try {
             URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
-                    .path("/trade/activate-bidding/" + collection + "/" + nftId)
+                    .path("/trade/activate-bidding/" + NFT_CONTRACT_ADDRESS + "/" + nftId)
                     .encode()
                     .build()
                     .toUri();
@@ -175,34 +195,40 @@ public class TradeService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-//            System.out.println(privateKey); // privateKey가 { "privateKey" : " " } 형태로 넘어온다.
+            UserEntity currentUser = userService.getCurrentUserEntity();
+            String privateKeyDB = currentUser.getWalletPrivateKey();
+            // Create a map to hold the private key
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("privateKey", privateKeyDB);
 
-            HttpEntity<String> requestEntity = new HttpEntity<>(privateKey, headers);
+            // Convert the request body to JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonBody = objectMapper.writeValueAsString(requestBody);
+
+            HttpEntity<String> requestEntity = new HttpEntity<>(jsonBody, headers);
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, requestEntity, String.class);
 
             Map<String, Object> responseMap;
-            try{
-                responseMap = objectMapper.readValue(response.getBody(), HashMap.class);
-            } catch (JsonProcessingException e) {
-                return new HttpResponseDTO<>("error", 500, "Failed to Parse Json from Response", null, Instant.now());
-            }
-            Map<String, Object> dataMap = (Map<String, Object>) responseMap.get("data");
+            responseMap = objectMapper.readValue(response.getBody(), HashMap.class);
 
+            Map<String, Object> dataMap = (Map<String, Object>) responseMap.get("data");
             TransactionResponseDTO transactionResponse = TransactionResponseDTO.from(dataMap);
 
             return new HttpResponseDTO<>("success", 200, "Bidding activated", transactionResponse, Instant.now());
         } catch (RestClientException e) {
             return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
+        } catch (JsonProcessingException e) {
+            return new HttpResponseDTO<>("error", 500, "Failed to Parse Json from Response", null, Instant.now());
         }
-
     }
 
+
     // Deactivate bidding
-    public HttpResponseDTO<TransactionResponseDTO> deactivateBidding(String collection, int nftId, String privateKey) {
-        try{
+    public HttpResponseDTO<TransactionResponseDTO> deactivateBidding(int nftId) {
+        try {
             URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
-                    .path("/trade/deactivate-bidding/" + collection + "/" + nftId)
+                    .path("/trade/deactivate-bidding/" + NFT_CONTRACT_ADDRESS + "/" + nftId)
                     .encode()
                     .build()
                     .toUri();
@@ -210,25 +236,31 @@ public class TradeService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-//            System.out.println(privateKey); // privateKey가 { "privateKey" : " " } 형태로 넘어온다.
+            UserEntity currentUser = userService.getCurrentUserEntity();
+            String privateKeyDB = currentUser.getWalletPrivateKey();
+            // Create a map to hold the private key
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("privateKey", privateKeyDB);
 
-            HttpEntity<String> requestEntity = new HttpEntity<>(privateKey, headers);
+            // Convert the request body to JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonBody = objectMapper.writeValueAsString(requestBody);
+
+            HttpEntity<String> requestEntity = new HttpEntity<>(jsonBody, headers);
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, requestEntity, String.class);
 
             Map<String, Object> responseMap;
-            try{
-                responseMap = objectMapper.readValue(response.getBody(), HashMap.class);
-            } catch (JsonProcessingException e) {
-                return new HttpResponseDTO<>("error", 500, "Failed to Parse Json from Response", null, Instant.now());
-            }
-            Map<String, Object> dataMap = (Map<String, Object>) responseMap.get("data");
+            responseMap = objectMapper.readValue(response.getBody(), HashMap.class);
 
+            Map<String, Object> dataMap = (Map<String, Object>) responseMap.get("data");
             TransactionResponseDTO transactionResponse = TransactionResponseDTO.from(dataMap);
 
-            return new HttpResponseDTO<>("success", 200, "Bidding activated", transactionResponse, Instant.now());
+            return new HttpResponseDTO<>("success", 200, "Bidding deactivated", transactionResponse, Instant.now());
         } catch (RestClientException e) {
             return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
+        } catch (JsonProcessingException e) {
+            return new HttpResponseDTO<>("error", 500, "Failed to Parse Json from Response", null, Instant.now());
         }
     }
 
@@ -274,8 +306,6 @@ public class TradeService {
             return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
         }
     }
-
-
     // Accept a bid
     public HttpResponseDTO<TransactionResponseDTO> acceptBid(String collection, int nftId, int bidId, String privateKey) {
         try{
@@ -307,6 +337,170 @@ public class TradeService {
             return new HttpResponseDTO<>("success", 200, "Bidding Accepted Successfully", transactionResponse, Instant.now());
         } catch (RestClientException e) {
             return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
+        }
+    }
+
+    // Get bids on an NFT
+    public HttpResponseDTO<Map<String, List<BidResponseDTO>>> getAllBidsReceived() {
+        System.out.printf("getAllBidsReceived activated \n");
+        try {
+            // Retrieve the current user
+            UserEntity currentUser = userService.getCurrentUserEntity();
+            List<PostEntity> userOwnedPosts = postRepository.findAllByOwnerUserId(currentUser);
+            Set<Long> ownedNftIds = userOwnedPosts.stream()
+                    .map(PostEntity::getNftId)
+                    .collect(Collectors.toSet());
+
+            if (ownedNftIds.isEmpty()) {
+                // If the user doesn't own any NFTs, return an empty response
+                return new HttpResponseDTO<>("success", 200, "No NFTs owned by the user", Map.of("bidsOnNFT", new ArrayList<BidResponseDTO>()), Instant.now());
+            }
+
+            // Get the total count of NFTs
+            Long nftCount = onchainService.getNftCountLocal();
+
+            RestTemplate restTemplate = new RestTemplate();
+            List<BidResponseDTO> allBidsForOwnedNFTs = new ArrayList<>();
+
+            // Loop through each NFT ID from 0 to nftCount-1
+            for (long nftId = 0; nftId < nftCount; nftId++) {
+                System.out.println("Sending BC Http Request for nftID: " + nftId);
+                URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
+                        .path("/trade/nft-bids/" + NFT_CONTRACT_ADDRESS + "/" + nftId)
+                        .encode()
+                        .build()
+                        .toUri();
+
+                // Send HTTP request for each NFT ID
+                ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
+
+                // Parse the JSON response
+                Map<String, Object> responseMap = objectMapper.readValue(responseEntity.getBody(), HashMap.class);
+                List<Map<String, Object>> bidsList = (List<Map<String, Object>>) ((Map<String, Object>) responseMap.get("data")).get("bidsOnNFT");
+
+                // Convert to BidDTO list for each bid
+                List<BidDTO> bidDTOList = bidsList.stream().map(bid -> BidDTO.builder()
+                        .addressNFTCollection((String) bid.get("addressNFTCollection"))
+                        .nftId(Long.parseLong((String) bid.get("nftId")))
+                        .addressPaymentToken((String) bid.get("addressPaymentToken"))
+                        .amountPaymentToken(Long.parseLong((String) bid.get("amountPaymentToken")))
+                        .endTime(Long.parseLong((String) bid.get("endTime")))
+                        .bidder((String) bid.get("bidder"))
+                        .build()
+                ).toList();
+
+                // Add bids only for NFTs that the user owns and map them to BidResponseDTO
+                for (BidDTO bidDTO : bidDTOList) {
+                    if (ownedNftIds.contains(bidDTO.getNftId())) {
+                        // Retrieve bidder name from UserEntity
+                        UserEntity bidder = userRepository.findByWalletAddress(bidDTO.getBidder());
+                        String bidderAccountId = bidder != null ? bidder.getAccountId() : "Unknown";
+
+                        // Retrieve post and image URL
+                        Optional<PostEntity> postEntityOptional = postRepository.findByNftId(bidDTO.getNftId());
+                        String imgUrl = postEntityOptional.isPresent() && !postEntityOptional.get().getImages().isEmpty()
+                                ? postEntityOptional.get().getImages().get(0).getImgUrl()
+                                : "No Image";
+
+                        // Build BidResponseDTO
+                        BidResponseDTO bidResponseDTO = BidResponseDTO.builder()
+                                .bidDTO(bidDTO)
+                                .bidderAccountId(bidderAccountId)
+                                .imgUrl(imgUrl)
+                                .build();
+
+                        allBidsForOwnedNFTs.add(bidResponseDTO);
+                    }
+                }
+            }
+
+            Map<String, List<BidResponseDTO>> data = new HashMap<>();
+            data.put("bidsOnNFT", allBidsForOwnedNFTs);
+
+            // Return success response
+            return new HttpResponseDTO<>("success", 200, "NFT bids retrieved successfully", data, Instant.now());
+        } catch (RestClientException | JsonProcessingException e) {
+            return new HttpResponseDTO<>("error", 500, "Failed to retrieve NFT bids", null, Instant.now());
+        }
+    }
+
+    public HttpResponseDTO<Map<String, List<BidResponseDTO>>> getAllBidsProposedByUser() {
+        System.out.printf("getAllBidsPlacedByUser activated \n");
+        try {
+            // Retrieve the current user's wallet address
+            UserEntity currentUser = userService.getCurrentUserEntity();
+            String userWalletAddress = currentUser.getWalletAddress();
+
+            if (userWalletAddress == null || userWalletAddress.isEmpty()) {
+                // If the user doesn't have a wallet address, return an empty response
+                return new HttpResponseDTO<>("success", 200, "User does not have a wallet address", Map.of("bidsPlacedByUser", new ArrayList<BidResponseDTO>()), Instant.now());
+            }
+
+            // Get the total count of NFTs
+            Long nftCount = onchainService.getNftCountLocal();
+
+            RestTemplate restTemplate = new RestTemplate();
+            List<BidResponseDTO> allBidsPlacedByUser = new ArrayList<>();
+
+            // Loop through each NFT ID from 0 to nftCount-1
+            for (long nftId = 0; nftId < nftCount; nftId++) {
+                System.out.println("Sending BC Http Request for nftID : " + nftId);
+                URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
+                        .path("/trade/nft-bids/" + NFT_CONTRACT_ADDRESS + "/" + nftId)
+                        .encode()
+                        .build()
+                        .toUri();
+
+                // Send HTTP request for each NFT ID
+                ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
+
+                // Parse the JSON response
+                Map<String, Object> responseMap = objectMapper.readValue(responseEntity.getBody(), HashMap.class);
+                List<Map<String, Object>> bidsList = (List<Map<String, Object>>) ((Map<String, Object>) responseMap.get("data")).get("bidsOnNFT");
+
+                // Convert to BidDTO list for each bid
+                List<BidDTO> bidDTOList = bidsList.stream().map(bid -> BidDTO.builder()
+                        .addressNFTCollection((String) bid.get("addressNFTCollection"))
+                        .nftId(Long.parseLong((String) bid.get("nftId")))
+                        .addressPaymentToken((String) bid.get("addressPaymentToken"))
+                        .amountPaymentToken(Long.parseLong((String) bid.get("amountPaymentToken")))
+                        .endTime(Long.parseLong((String) bid.get("endTime")))
+                        .bidder((String) bid.get("bidder"))
+                        .build()
+                ).toList();
+
+                // Add bids where the bidder matches the current user's wallet address
+                for (BidDTO bidDTO : bidDTOList) {
+                    if (userWalletAddress.equalsIgnoreCase(bidDTO.getBidder())) {
+                        // Retrieve bidder name from UserEntity
+                        UserEntity bidder = userRepository.findByWalletAddress(bidDTO.getBidder());
+                        String bidderAccountId = bidder != null ? bidder.getAccountId() : "Unknown";
+
+                        // Retrieve post and image URL
+                        Optional<PostEntity> postEntityOptional = postRepository.findByNftId(bidDTO.getNftId());
+                        String imgUrl = postEntityOptional.isPresent() && !postEntityOptional.get().getImages().isEmpty()
+                                ? postEntityOptional.get().getImages().get(0).getImgUrl()
+                                : "No Image";
+
+                        // Build BidResponseDTO
+                        BidResponseDTO bidResponseDTO = BidResponseDTO.builder()
+                                .bidDTO(bidDTO)
+                                .bidderAccountId(bidderAccountId)
+                                .imgUrl(imgUrl)
+                                .build();
+
+                        allBidsPlacedByUser.add(bidResponseDTO);
+                    }
+                }
+            }
+
+            Map<String, List<BidResponseDTO>> data = new HashMap<>();
+            data.put("bidsPlacedByUser", allBidsPlacedByUser);
+
+            // Return success response
+            return new HttpResponseDTO<>("success", 200, "NFT bids placed by the user retrieved successfully", data, Instant.now());
+        } catch (RestClientException | JsonProcessingException e) {
+            return new HttpResponseDTO<>("error", 500, "Failed to retrieve NFT bids placed by the user", null, Instant.now());
         }
     }
 

@@ -22,7 +22,10 @@ public class ImageEntity extends BaseEntity {
     @NonNull
     private String imgUrl;
 
+//    @NonNull
+//    @ManyToOne
+//    private PostEntity postEntity;
     @NonNull
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)  // Set cascade type
     private PostEntity postEntity;
 }
