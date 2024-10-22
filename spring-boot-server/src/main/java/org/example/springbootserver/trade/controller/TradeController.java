@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.springbootserver.global.dto.HttpResponseDTO;
 import org.example.springbootserver.onchain.dto.TransactionResponseDTO;
 import org.example.springbootserver.trade.dto.BidDTO;
+import org.example.springbootserver.trade.dto.BidRequestDTO;
 import org.example.springbootserver.trade.dto.BidResponseDTO;
 import org.example.springbootserver.trade.service.TradeService;
 import org.springframework.http.HttpStatus;
@@ -96,23 +97,18 @@ public class TradeController {
 
     // Create a new bid for an NFT
     @PostMapping("/bid")
-    public ResponseEntity<HttpResponseDTO<TransactionResponseDTO>> createBid(@RequestBody CreateBidRequest createBidRequest) {
+    public ResponseEntity<HttpResponseDTO<TransactionResponseDTO>> createBid(@RequestBody BidRequestDTO bidRequest) {
         // Extract the bidRequest and privateKey from the combined DTO
-        BidDTO bidRequest = createBidRequest.getBidRequest();
-        String privateKey = createBidRequest.getPrivateKey();
-
-        HttpResponseDTO<TransactionResponseDTO> response = tradeService.createBid(bidRequest, privateKey);
+        HttpResponseDTO<TransactionResponseDTO> response = tradeService.createBid(bidRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     // Accept a bid for an NFT
-    @PostMapping("/acceptBid/{collection}/{nftId}/{bidId}")
+    @PostMapping("/acceptBid/{nftId}/{bidId}")
     public ResponseEntity<HttpResponseDTO<TransactionResponseDTO>> acceptBid(
-            @PathVariable String collection,
             @PathVariable int nftId,
-            @PathVariable int bidId,
-            @RequestBody String privateKey) {
-        HttpResponseDTO<TransactionResponseDTO> response = tradeService.acceptBid(collection, nftId, bidId, privateKey);
+            @PathVariable int bidId) {
+        HttpResponseDTO<TransactionResponseDTO> response = tradeService.acceptBid(nftId, bidId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
