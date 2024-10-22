@@ -1,18 +1,22 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
 import typo from '../../../assets/Typograph';
 import theme from '../../../assets/Theme';
+import { Unix_timestamp } from '../../../Utils/TimeUtils';
 
 const SendedTransRow = ({ data }) => {
+  // bidsPlacedByUser array의 원소
+  const time = Unix_timestamp(data.bidDTO.endTime).split(' ');
+
   return (
     <View style={styles.root}>
-      <Image source={{ uri: data.image }} style={styles.image} />
+      <Image source={{ uri: data.imgUrl }} style={styles.image} />
       <View style={styles.center}>
-        <Text style={styles.name}>{data.name}</Text>
-        <Text style={styles.price}>{data.price + '$'}</Text>
+        <Text style={styles.name}>{data.bidderAccountId}</Text>
+        <Text style={styles.price}>{data.bidDTO.amountPaymentToken + '$'}</Text>
       </View>
       <View style={styles.tail}>
-        <Text style={styles.create}>{data.createTime}</Text>
-        <Text style={styles.valid}>{data.validDate}</Text>
+        <Text style={styles.create}>{time[0]}</Text>
+        <Text style={styles.valid}>{time[1]}</Text>
       </View>
     </View>
   );

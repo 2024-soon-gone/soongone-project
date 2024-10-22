@@ -2,17 +2,20 @@ import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 import typo from '../../../assets/Typograph';
 import theme from '../../../assets/Theme';
 import AcceptButton from './AcceptButton';
+import { Unix_timestamp } from '../../../Utils/TimeUtils';
 
 const ReceivedTransRow = ({ data }) => {
+  var time = Unix_timestamp(data.bidDTO.endTime).split(' ');
+  time = time[0] + '\n' + time[1];
   return (
     <View style={styles.root}>
-      <Image source={{ uri: data.image }} style={styles.image} />
+      <Image source={{ uri: data.imgUrl }} style={styles.image} />
       <View style={styles.center}>
-        <Text style={styles.name}>{data.name}</Text>
-        <Text style={styles.price}>{data.price + '$'}</Text>
+        <Text style={styles.name}>{data.bidderAccountId}</Text>
+        <Text style={styles.price}>{data.bidDTO.amountPaymentToken + '$'}</Text>
       </View>
       <View style={styles.tail}>
-        <Text style={styles.valid}>{data.validDate}</Text>
+        <Text style={styles.valid}>{time}</Text>
       </View>
       <AcceptButton />
     </View>
@@ -57,6 +60,7 @@ const styles = StyleSheet.create({
   valid: {
     ...typo.bold,
     color: theme.grey6,
+    textAlign: 'right',
   },
 });
 

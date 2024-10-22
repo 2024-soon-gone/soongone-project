@@ -1,53 +1,69 @@
-import { View, StyleSheet, Pressable, Text, ScrollView } from 'react-native';
-import { useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Text,
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
+import { useState, useCallback, useEffect } from 'react';
 import theme from '../../assets/Theme';
 import SendedTransSeg from './Components/SendedTransSeg';
 import ReceivedTransSeg from './Components/ReceivedTransSeg';
+import { useFocusEffect } from '@react-navigation/native';
+import api from '../../Utils/API/Axios';
 
-const data = [
-  {
-    image:
-      'https://previews.123rf.com/images/aquir/aquir1311/aquir131100316/23569861-%EC%83%98%ED%94%8C-%EC%A7%80-%EB%B9%A8%EA%B0%84%EC%83%89-%EB%9D%BC%EC%9A%B4%EB%93%9C-%EC%8A%A4%ED%83%AC%ED%94%84.jpg',
-    name: 'sooyoung12',
-    price: 12,
-    createTime: '2021-05-01 12:20:31',
-    validDate: '2021-05-01 12:20:31',
-  },
-  {
-    image:
-      'https://previews.123rf.com/images/aquir/aquir1311/aquir131100316/23569861-%EC%83%98%ED%94%8C-%EC%A7%80-%EB%B9%A8%EA%B0%84%EC%83%89-%EB%9D%BC%EC%9A%B4%EB%93%9C-%EC%8A%A4%ED%83%AC%ED%94%84.jpg',
-    name: 'sooyoung12',
-    price: 12,
-    createTime: '2021-05-01 12:20:31',
-    validDate: '2021-05-01 12:20:31',
-  },
-  {
-    image:
-      'https://previews.123rf.com/images/aquir/aquir1311/aquir131100316/23569861-%EC%83%98%ED%94%8C-%EC%A7%80-%EB%B9%A8%EA%B0%84%EC%83%89-%EB%9D%BC%EC%9A%B4%EB%93%9C-%EC%8A%A4%ED%83%AC%ED%94%84.jpg',
-    name: 'sooyoung12',
-    price: 12,
-    createTime: '2021-05-01 12:20:31',
-    validDate: '2021-05-01 12:20:31',
-  },
-  {
-    image:
-      'https://previews.123rf.com/images/aquir/aquir1311/aquir131100316/23569861-%EC%83%98%ED%94%8C-%EC%A7%80-%EB%B9%A8%EA%B0%84%EC%83%89-%EB%9D%BC%EC%9A%B4%EB%93%9C-%EC%8A%A4%ED%83%AC%ED%94%84.jpg',
-    name: 'sooyoung12',
-    price: 12,
-    createTime: '2021-05-01 12:20:31',
-    validDate: '2021-05-01 12:20:31',
-  },
-  {
-    image:
-      'https://previews.123rf.com/images/aquir/aquir1311/aquir131100316/23569861-%EC%83%98%ED%94%8C-%EC%A7%80-%EB%B9%A8%EA%B0%84%EC%83%89-%EB%9D%BC%EC%9A%B4%EB%93%9C-%EC%8A%A4%ED%83%AC%ED%94%84.jpg',
-    name: 'sooyoung12',
-    price: 12,
-    createTime: '2021-05-01 12:20:31',
-    validDate: '2021-05-01 12:20:31',
-  },
-];
-const Transaction = () => {
+const Transaction = ({ route }) => {
   const [segmentSend, setSegmentSend] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [proposedData, setProposedData] = useState([]);
+  const [receivedData, setReceivedData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    console.log('거래하기 화면 초기화');
+    setIsLoading(true);
+    api.get('/trade/nft-bids/proposed').then((res) => {
+      console.log(res.data);
+      setProposedData(res.data.data.bidsPlacedByUser);
+      setIsLoading(false);
+    });
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (route.params && route.params.refresh) {
+        setSegmentSend(true);
+        setIsLoading(true);
+        api.get('/trade/nft-bids/proposed').then((res) => {
+          setProposedData(res.data.data.bidsPlacedByUser);
+          setIsLoading(false);
+          route.params.refresh = false;
+        });
+      }
+      return;
+    }, [route]),
+  );
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    if (segmentSend) {
+      console.log('보낸 제안 새로고침');
+      api.get('/trade/nft-bids/proposed').then((res) => {
+        console.log(res.data);
+        setProposedData(res.data.data.bidsPlacedByUser);
+        setRefreshing(false);
+      });
+    } else {
+      console.log('받은 제안 새로고침');
+      api.get('/trade/nft-bids/received').then((res) => {
+        console.log(res.data);
+        setReceivedData(res.data.data.bidsOnNFT);
+        setRefreshing(false);
+      });
+    }
+  };
+
   return (
     <View style={styles.root}>
       <View style={styles.header}>
@@ -59,6 +75,13 @@ const Transaction = () => {
             }}
             onPress={() => {
               setSegmentSend(true);
+              if (proposedData.length > 0) return;
+              setIsLoading(true);
+              api.get('/trade/nft-bids/proposed').then((res) => {
+                console.log(res.data);
+                setProposedData(res.data.data.bidsPlacedByUser);
+                setIsLoading(false);
+              });
             }}
           >
             <Text>보낸 제안</Text>
@@ -70,17 +93,31 @@ const Transaction = () => {
             }}
             onPress={() => {
               setSegmentSend(false);
+              if (receivedData.length > 0) return;
+              setIsLoading(true);
+              api.get('/trade/nft-bids/received').then((res) => {
+                console.log(res.data);
+                setReceivedData(res.data.data.bidsOnNFT);
+                setIsLoading(false);
+              });
             }}
           >
             <Text>받은 제안</Text>
           </Pressable>
         </View>
       </View>
-      <ScrollView style={styles.contents}>
-        {segmentSend ? (
-          <SendedTransSeg data={data} />
+      <ScrollView
+        style={styles.contents}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {isLoading ? (
+          <ActivityIndicator size={'large'} />
+        ) : segmentSend ? (
+          <SendedTransSeg data={proposedData} />
         ) : (
-          <ReceivedTransSeg data={data} />
+          <ReceivedTransSeg data={receivedData} />
         )}
       </ScrollView>
     </View>

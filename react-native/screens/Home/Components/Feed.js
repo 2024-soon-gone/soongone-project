@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Menu, MenuItem, MenuDivider } from 'react-native-material-menu';
 import { useState, useEffect } from 'react';
 import { getItem } from '../../../Utils/Storage/AsyncStorage';
-import { api } from '../../../Utils/API/Axios';
+import api from '../../../Utils/API/Axios';
 
 const WINDOW_WIDTH = Dimensions.get('window').width;
 
@@ -28,16 +28,25 @@ const Feed = ({
   text,
   onBidPress,
   isMine,
+  nftId,
 }) => {
   const [visible, setVisible] = useState(false);
   const showMenu = () => setVisible(true);
-  const activateBid = () => {
+  const activateBid = (nftId) => {
     setVisible(false);
-    console.log('거래 허용');
+    if (!isMine) return;
+    console.log('거래 허용: ' + nftId);
+    api.post('/trade/activateBidding/' + nftId).then((res) => {
+      console.log(res.data);
+    });
   };
   const deactivateBid = () => {
     setVisible(false);
-    console.log('거래 거부');
+    if (!isMine) return;
+    console.log('거래 거부: ' + nftId);
+    api.post('/trade/deactivateBidding/' + nftId).then((res) => {
+      console.log(res.data);
+    });
   };
   const hideMenu = () => {
     setVisible(false);
@@ -58,7 +67,7 @@ const Feed = ({
               anchor={<Icon name="menu" size={24} onPress={showMenu} />}
               onRequestClose={hideMenu}
             >
-              <MenuItem onPress={activateBid}>거래 허용</MenuItem>
+              <MenuItem onPress={() => activateBid(nftId)}>거래 허용</MenuItem>
               <MenuItem onPress={deactivateBid}>거래 거부</MenuItem>
             </Menu>
           </View>

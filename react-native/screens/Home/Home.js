@@ -21,18 +21,23 @@ import BidDoneButton from './Components/BidDoneBtn';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getItem } from '../../Utils/Storage/AsyncStorage';
 
-const Home = ({ route }) => {
+const Home = ({ route, navigation }) => {
   const [feeds, setFeeds] = useState([]);
   const [mySocialId, setMySocialId] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [bidding, setBidding] = useState(false);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
+
+  // 거래 제안 관련 State
+  const [bidPost, setBidPost] = useState({});
   const [items, setItems] = useState([
-    { label: '1시간', value: '1시간' },
-    { label: '12시간', value: '12시간' },
-    { label: '하루', value: '하루' },
+    { label: '1시간', value: 1 },
+    { label: '12시간', value: 12 },
+    { label: '하루', value: 24 },
   ]);
+  const [bidTokens, setBidTokens] = useState(0);
+  const [bidDuration, setBidDuration] = useState('');
 
   useEffect(() => {
     api.get('/post').then((res) => {
@@ -53,7 +58,6 @@ const Home = ({ route }) => {
 
   useFocusEffect(
     useCallback(() => {
-      console.log(route.params);
       if (route.params && route.params.refresh) {
         api.get('/post').then((res) => {
           console.log(`feeds count: ${res.data.length}`);
@@ -67,7 +71,31 @@ const Home = ({ route }) => {
 
   const onBidPress = (postId) => {
     console.log(`${postId} 거래 제안`);
+    const selectPost = feeds.filter((post) => post.postDTO.id == postId);
+    setBidPost(selectPost[0]);
     setBidding(true);
+  };
+
+  const onProposeBidPress = () => {
+    const proposeData = {
+      amountPaymentToken: 0,
+      endTime: '',
+      nftId: -1,
+    };
+    proposeData.amountPaymentToken = parseInt(bidTokens);
+    proposeData.endTime = new Date().getTime() + bidDuration * 3600000; // 1000ms * 60sec * 60min
+    proposeData.nftId = parseInt(bidPost.postDTO.nftId);
+    console.log(proposeData);
+    api
+      .post('/trade/bid', proposeData)
+      .then((res) => {
+        console.log(res.data);
+        setBidding(false);
+        navigation.navigate('Transaction', { refresh: true });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -92,6 +120,7 @@ const Home = ({ route }) => {
               key={feed.postDTO.id}
               onBidPress={onBidPress}
               postId={feed.postDTO.id}
+              nftId={feed.postDTO.nftId}
               isMine={mySocialId == feed.postDTO.ownerUser.socialUserIdentifier}
             />
           );
@@ -123,7 +152,7 @@ const Home = ({ route }) => {
                 }}
               >
                 <Image
-                  source={{ uri: feeds[0].nftImgIpfsUri }}
+                  source={{ uri: bidPost.nftImgIpfsUri }}
                   style={{ flex: 1, aspectRatio: 1, resizeMode: 'cover' }}
                 ></Image>
               </View>
@@ -135,6 +164,7 @@ const Home = ({ route }) => {
                   style={{ flex: 1, marginHorizontal: 4 }}
                   textAlign="right"
                   keyboardType="numeric"
+                  onChangeText={setBidTokens}
                 />
                 <Text>ETH</Text>
               </View>
@@ -161,6 +191,7 @@ const Home = ({ route }) => {
                     setOpen={setOpen}
                     setValue={setValue}
                     setItems={setItems}
+                    onChangeValue={setBidDuration}
                     closeOnBackPressed={true}
                     listMode="SCROLLVIEW"
                     scrollViewProps={{
@@ -190,7 +221,7 @@ const Home = ({ route }) => {
               </View>
             </ScrollView>
             <View style={{ width: '100%', alignItems: 'center' }}>
-              <BidDoneButton />
+              <BidDoneButton onPress={onProposeBidPress} />
             </View>
           </View>
         </View>
