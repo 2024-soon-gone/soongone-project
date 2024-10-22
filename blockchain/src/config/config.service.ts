@@ -9,8 +9,8 @@ dotenv.config(); // dotenv.config({ path: '.env.local' }); In case of .env file 
 
 @Injectable()
 export class ConfigService {
-  public getProvider(): ethers.WebSocketProvider {
-    const provider = new ethers.WebSocketProvider(
+  public getProvider(): ethers.JsonRpcProvider {
+    const provider = new ethers.JsonRpcProvider(
       // In case of additional API Key required
       process.env.NETWORK_ENDPOINT_URL + `/${process.env.INFURA_PROJECT_ID}`,
       // In case of API Key not required
