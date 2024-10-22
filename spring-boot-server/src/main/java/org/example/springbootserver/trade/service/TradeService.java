@@ -11,6 +11,7 @@ import org.example.springbootserver.onchain.service.OnchainService;
 import org.example.springbootserver.post.entity.PostEntity;
 import org.example.springbootserver.post.repository.PostRepository;
 import org.example.springbootserver.trade.dto.BidDTO;
+import org.example.springbootserver.trade.dto.BidRequestDTO;
 import org.example.springbootserver.trade.dto.BidResponseDTO;
 import org.example.springbootserver.user.entity.UserEntity;
 import org.example.springbootserver.user.repository.UserRepository;
@@ -39,6 +40,9 @@ public class TradeService {
 
     @Value("${spring.blockchain-server.contract.NFT_CONTRACT_ADDRESS}")
     private String NFT_CONTRACT_ADDRESS;
+
+    @Value("${spring.blockchain-server.contract.TOKEN_CONTRACT_ADDRESS}")
+    private String TOKEN_CONTRACT_ADDRESS;
 
     private final ObjectMapper objectMapper;
     private final UserService userService;
@@ -265,7 +269,7 @@ public class TradeService {
     }
 
     // Create Bid
-    public HttpResponseDTO<TransactionResponseDTO> createBid(BidDTO bidRequest, String privateKey) {
+    public HttpResponseDTO<TransactionResponseDTO> createBid(BidRequestDTO bidRequest) {
         try {
             URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
                     .path("/trade/bid")
@@ -276,9 +280,26 @@ public class TradeService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
+            System.out.println("bidRequest : " + bidRequest.toString());
+
+            // Fetch current user's information
+            UserEntity currentUser = userService.getCurrentUserEntity();
+            String privateKey = currentUser.getWalletPrivateKey();
+            String walletAddress = currentUser.getWalletAddress(); // Assuming you have a method to get the wallet address
+
+            // Build BidDTO from BidRequestDTO
+            BidDTO bidDTO = BidDTO.builder()
+                    .addressNFTCollection(NFT_CONTRACT_ADDRESS) // Set NFT_CONTRACT_ADDRESS
+                    .nftId(bidRequest.getNftId())
+                    .addressPaymentToken(TOKEN_CONTRACT_ADDRESS) // Set TOKEN_CONTRACT_ADDRESS
+                    .amountPaymentToken(bidRequest.getAmountPaymentToken())
+                    .endTime(bidRequest.getEndTime())
+                    .bidder(walletAddress) // Set the wallet address of the current user
+                    .build();
+
             // Create the body of the request
             Map<String, Object> body = new HashMap<>();
-            body.put("bidRequest", bidRequest);  // BidDTO is already structured
+            body.put("bidRequest", bidDTO);  // Use the constructed BidDTO
             body.put("privateKey", privateKey);  // Adding the private key
 
             // Convert the body to JSON string
@@ -306,11 +327,13 @@ public class TradeService {
             return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
         }
     }
+
+
     // Accept a bid
-    public HttpResponseDTO<TransactionResponseDTO> acceptBid(String collection, int nftId, int bidId, String privateKey) {
-        try{
+    public HttpResponseDTO<TransactionResponseDTO> acceptBid( int nftId, int bidId) {
+        try {
             URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
-                    .path("/trade/acceptBid/" + collection + "/" + nftId + "/" + bidId)
+                    .path("/trade/acceptBid/" + NFT_CONTRACT_ADDRESS + "/" + nftId + "/" + bidId)
                     .encode()
                     .build()
                     .toUri();
@@ -318,27 +341,42 @@ public class TradeService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-//            System.out.println(privateKey); // privateKey가 { "privateKey" : " " } 형태로 넘어온다.
+            // Fetch current user's private key
+            UserEntity currentUser = userService.getCurrentUserEntity();
+            String privateKey = currentUser.getWalletPrivateKey();
 
-            HttpEntity<String> requestEntity = new HttpEntity<>(privateKey, headers);
+            System.out.println("User PK fetched from DB : " + privateKey);
+
+            // Create request body with the private key
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("privateKey", privateKey);
+
+            // Convert the request body to JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonBody = objectMapper.writeValueAsString(requestBody);
+
+            HttpEntity<String> requestEntity = new HttpEntity<>(jsonBody, headers);
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, requestEntity, String.class);
 
             Map<String, Object> responseMap;
-            try{
+            try {
                 responseMap = objectMapper.readValue(response.getBody(), HashMap.class);
             } catch (JsonProcessingException e) {
                 return new HttpResponseDTO<>("error", 500, "Failed to Parse Json from Response", null, Instant.now());
             }
-            Map<String, Object> dataMap = (Map<String, Object>) responseMap.get("data");
 
+            Map<String, Object> dataMap = (Map<String, Object>) responseMap.get("data");
             TransactionResponseDTO transactionResponse = TransactionResponseDTO.from(dataMap);
 
             return new HttpResponseDTO<>("success", 200, "Bidding Accepted Successfully", transactionResponse, Instant.now());
         } catch (RestClientException e) {
             return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
+        } catch (JsonProcessingException e) {
+            return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
         }
     }
+
 
     // Get bids on an NFT
     public HttpResponseDTO<Map<String, List<BidResponseDTO>>> getAllBidsReceived() {
