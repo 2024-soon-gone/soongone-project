@@ -14,6 +14,8 @@ import * as dotenv from 'dotenv';
 export class NftService {
   private readonly nftContractAddress;
   private readonly nftContract;
+  private readonly marketPlaceAddress;
+  private readonly marketPlaceContract;
   private readonly adminPrivatekey;
   private readonly ipfsApiJWT;
   private readonly provider;
@@ -34,6 +36,12 @@ export class NftService {
     this.nftContract = new ethers.Contract(
       this.nftContractAddress,
       this.configService.getNFTContractABI(),
+      this.provider,
+    );
+    this.marketPlaceAddress = this.configService.getMarketPlaceAddress();
+    this.marketPlaceContract = new ethers.Contract(
+      this.marketPlaceAddress,
+      this.configService.getMarketPlaceABI(),
       this.provider,
     );
     this.adminPrivatekey = this.configService.getAdminPK();
@@ -96,6 +104,25 @@ export class NftService {
 
       // Wait for the transaction to be mined
       await transaction.wait();
+
+      // this.adminPrivatekey = this.configService.getAdminPK();
+      // this.ipfsApiJWT = this.configService.getIpfsJWT();
+      // this.adminWallet = new ethers.Wallet(this.adminPrivatekey, this.provider);
+      const userWallet = new ethers.Wallet(
+        mintDto.accountPrivateKey,
+        this.provider,
+      );
+      const approveTx = await this.nftContract
+        .connect(userWallet)
+        .setApprovalForAll(this.marketPlaceAddress, true);
+
+      console.log('NFT approved on MarketPlace Contract');
+
+      const activateTx = await this.marketPlaceContract
+        .connect(userWallet)
+        .activateBidding(this.nftContract, nftId);
+
+      console.log('NFT Bid Activated on MarketPlace Contract');
 
       console.log(`NFT Minted with metadata: ${jsonIpfsHash}`);
 

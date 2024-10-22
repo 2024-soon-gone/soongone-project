@@ -70,6 +70,7 @@ public class NftService {
         // Prepare the body using MultiValueMap for multipart/form-data
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("accountAddress", String.valueOf(currentUser.getWalletAddress()));
+        body.add("accountPrivateKey", String.valueOf(currentUser.getWalletPrivateKey()));
         body.add("name", String.valueOf(name));
         body.add("description", String.valueOf(description));
         body.add("file", createImgFile(file));
