@@ -25,7 +25,10 @@ const Transaction = ({ route }) => {
     setIsLoading(true);
     api.get('/trade/nft-bids/proposed').then((res) => {
       console.log(res.data);
-      setProposedData(res.data.data.bidsPlacedByUser);
+      const data = res.data.data.bidsPlacedByUser.filter(
+        (bid) => bid.bidDTO.endTime !== 0,
+      );
+      setProposedData(data);
       setIsLoading(false);
     });
   }, []);
@@ -36,7 +39,10 @@ const Transaction = ({ route }) => {
         setSegmentSend(true);
         setIsLoading(true);
         api.get('/trade/nft-bids/proposed').then((res) => {
-          setProposedData(res.data.data.bidsPlacedByUser);
+          const data = res.data.data.bidsPlacedByUser.filter(
+            (bid) => bid.bidDTO.endTime !== 0,
+          );
+          setProposedData(data);
           setIsLoading(false);
           route.params.refresh = false;
         });
@@ -51,19 +57,42 @@ const Transaction = ({ route }) => {
       console.log('보낸 제안 새로고침');
       api.get('/trade/nft-bids/proposed').then((res) => {
         console.log(res.data);
-        setProposedData(res.data.data.bidsPlacedByUser);
+        const data = res.data.data.bidsPlacedByUser.filter(
+          (bid) => bid.bidDTO.endTime !== 0,
+        );
+        setProposedData(data);
         setRefreshing(false);
       });
     } else {
-      console.log('받은 제안 새로고침');
       api.get('/trade/nft-bids/received').then((res) => {
         console.log(res.data);
-        setReceivedData(res.data.data.bidsOnNFT);
+        const data = res.data.data.bidsOnNFT.filter(
+          (bid) => bid.bidDTO.endTime !== 0,
+        );
+        setReceivedData(data);
         setRefreshing(false);
       });
     }
   };
 
+  const onAcceptBid = (nftId, bidId) => {
+    console.log(`제안 수락: ${nftId} ${bidId}`);
+    setIsLoading(true);
+    api
+      .post(`/trade/acceptBid/${nftId}/${bidId}`)
+      .then((res) => {
+        console.log(res.data);
+        setIsLoading(false);
+        setReceivedData(
+          receivedData.filter(
+            (bid) => bid.bidDTO.nftId !== nftId || bid.bidId !== bidId,
+          ),
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
   return (
     <View style={styles.root}>
       <View style={styles.header}>
@@ -79,7 +108,10 @@ const Transaction = ({ route }) => {
               setIsLoading(true);
               api.get('/trade/nft-bids/proposed').then((res) => {
                 console.log(res.data);
-                setProposedData(res.data.data.bidsPlacedByUser);
+                const data = res.data.data.bidsPlacedByUser.filter(
+                  (bid) => bid.bidDTO.endTime !== 0,
+                );
+                setProposedData(data);
                 setIsLoading(false);
               });
             }}
@@ -97,7 +129,10 @@ const Transaction = ({ route }) => {
               setIsLoading(true);
               api.get('/trade/nft-bids/received').then((res) => {
                 console.log(res.data);
-                setReceivedData(res.data.data.bidsOnNFT);
+                const data = res.data.data.bidsOnNFT.filter(
+                  (bid) => bid.bidDTO.endTime !== 0,
+                );
+                setReceivedData(data);
                 setIsLoading(false);
               });
             }}
@@ -117,7 +152,7 @@ const Transaction = ({ route }) => {
         ) : segmentSend ? (
           <SendedTransSeg data={proposedData} />
         ) : (
-          <ReceivedTransSeg data={receivedData} />
+          <ReceivedTransSeg data={receivedData} onAcceptBid={onAcceptBid} />
         )}
       </ScrollView>
     </View>

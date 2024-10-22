@@ -6,6 +6,7 @@ import {
   ScrollView,
   RefreshControl,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
@@ -28,6 +29,7 @@ const Home = ({ route, navigation }) => {
   const [bidding, setBidding] = useState(false);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
+  const [isBiddingLoading, setIsBiddingLoading] = useState(false);
 
   // 거래 제안 관련 State
   const [bidPost, setBidPost] = useState({});
@@ -42,7 +44,8 @@ const Home = ({ route, navigation }) => {
   useEffect(() => {
     api.get('/post').then((res) => {
       console.log(`feeds count: ${res.data.length}`);
-      setFeeds(res.data);
+      const data = res.data.sort((a, b) => b.postDTO.id - a.postDTO.id);
+      setFeeds(data);
     });
     getItem('socialUserIdentifier').then((socialId) => setMySocialId(socialId));
   }, []);
@@ -51,7 +54,8 @@ const Home = ({ route, navigation }) => {
     setRefreshing(true);
     api.get('/post').then((res) => {
       console.log(`feeds count: ${res.data.length}`);
-      setFeeds(res.data);
+      const data = res.data.sort((a, b) => b.postDTO.id - a.postDTO.id);
+      setFeeds(data);
       setRefreshing(false);
     });
   }, []);
@@ -61,7 +65,8 @@ const Home = ({ route, navigation }) => {
       if (route.params && route.params.refresh) {
         api.get('/post').then((res) => {
           console.log(`feeds count: ${res.data.length}`);
-          setFeeds(res.data);
+          const data = res.data.sort((a, b) => b.postDTO.id - a.postDTO.id);
+          setFeeds(data);
           route.params.refresh = false;
         });
       }
@@ -77,6 +82,7 @@ const Home = ({ route, navigation }) => {
   };
 
   const onProposeBidPress = () => {
+    setIsBiddingLoading(true);
     const proposeData = {
       amountPaymentToken: 0,
       endTime: '',
@@ -90,6 +96,7 @@ const Home = ({ route, navigation }) => {
       .post('/trade/bid', proposeData)
       .then((res) => {
         console.log(res.data);
+        setIsBiddingLoading(false);
         setBidding(false);
         navigation.navigate('Transaction', { refresh: true });
       })
@@ -130,98 +137,105 @@ const Home = ({ route, navigation }) => {
       {bidding && (
         <View style={styles.bidding}>
           <View style={styles.modal}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Text style={typo.H4}>거래 제안하기</Text>
-              <Pressable onPress={() => setBidding(false)}>
-                <Icon name="cancel" size={28} color={theme.negative}></Icon>
-              </Pressable>
-            </View>
-            <ScrollView styles={{ height: '90%', zIndex: 20 }}>
+            {isBiddingLoading && (
+              <View style={styles.biddingLoading}>
+                <ActivityIndicator size={'large'} />
+              </View>
+            )}
+            <View style={{ padding: 16, height: '100%' }}>
               <View
                 style={{
-                  alignItems: 'center',
-                  padding: 16,
                   flexDirection: 'row',
-                  alignItems: 'flex-start',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                 }}
               >
-                <Image
-                  source={{ uri: bidPost.nftImgIpfsUri }}
-                  style={{ flex: 1, aspectRatio: 1, resizeMode: 'cover' }}
-                ></Image>
+                <Text style={typo.H4}>거래 제안하기</Text>
+                <Pressable onPress={() => setBidding(false)}>
+                  <Icon name="cancel" size={28} color={theme.negative}></Icon>
+                </Pressable>
               </View>
-              <View style={styles.modalInputContainer}>
-                <Text style={{ ...typo.label_bold, fontSize: 16 }}>
-                  거래 가격
-                </Text>
-                <TextInput
-                  style={{ flex: 1, marginHorizontal: 4 }}
-                  textAlign="right"
-                  keyboardType="numeric"
-                  onChangeText={setBidTokens}
-                />
-                <Text>ETH</Text>
-              </View>
-              <View
-                style={{
-                  ...styles.modalInputContainer,
-                  zIndex: 40,
-                  marginBottom: 100,
-                }}
-              >
-                <Text
+              <ScrollView styles={{ height: '90%', zIndex: 20 }}>
+                <View
                   style={{
-                    ...typo.label_bold,
-                    fontSize: 16,
+                    alignItems: 'center',
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
                   }}
                 >
-                  유효 기간
-                </Text>
-                <View style={{ zIndex: 500 }}>
-                  <DropDownPicker
-                    open={open}
-                    value={value}
-                    items={items}
-                    setOpen={setOpen}
-                    setValue={setValue}
-                    setItems={setItems}
-                    onChangeValue={setBidDuration}
-                    closeOnBackPressed={true}
-                    listMode="SCROLLVIEW"
-                    scrollViewProps={{
-                      nestedScrollEnabled: true,
-                    }}
-                    style={{
-                      minHeight: 10,
-                      borderWidth: 0,
-                    }}
-                    maxHeight={200}
-                    containerStyle={{
-                      width: 150,
-                      margin: 0,
-                      padding: 0,
-                    }}
-                    textStyle={{
-                      fontSize: 14,
-                      fontFamily: 'Pretendard-Bold',
-                      textAlign: 'right',
-                    }}
-                    listItemContainerStyle={{
-                      height: 30,
-                    }}
-                    showTickIcon={false}
-                  />
+                  <Image
+                    source={{ uri: bidPost.nftImgIpfsUri }}
+                    style={{ flex: 1, aspectRatio: 1, resizeMode: 'cover' }}
+                  ></Image>
                 </View>
+                <View style={styles.modalInputContainer}>
+                  <Text style={{ ...typo.label_bold, fontSize: 16 }}>
+                    거래 가격
+                  </Text>
+                  <TextInput
+                    style={{ flex: 1, marginHorizontal: 4 }}
+                    textAlign="right"
+                    keyboardType="numeric"
+                    onChangeText={setBidTokens}
+                  />
+                  <Text>ETH</Text>
+                </View>
+                <View
+                  style={{
+                    ...styles.modalInputContainer,
+                    zIndex: 40,
+                    marginBottom: 100,
+                  }}
+                >
+                  <Text
+                    style={{
+                      ...typo.label_bold,
+                      fontSize: 16,
+                    }}
+                  >
+                    유효 기간
+                  </Text>
+                  <View style={{ zIndex: 500 }}>
+                    <DropDownPicker
+                      open={open}
+                      value={value}
+                      items={items}
+                      setOpen={setOpen}
+                      setValue={setValue}
+                      setItems={setItems}
+                      onChangeValue={setBidDuration}
+                      closeOnBackPressed={true}
+                      listMode="SCROLLVIEW"
+                      scrollViewProps={{
+                        nestedScrollEnabled: true,
+                      }}
+                      style={{
+                        minHeight: 10,
+                        borderWidth: 0,
+                      }}
+                      maxHeight={200}
+                      containerStyle={{
+                        width: 150,
+                        margin: 0,
+                        padding: 0,
+                      }}
+                      textStyle={{
+                        fontSize: 14,
+                        fontFamily: 'Pretendard-Bold',
+                        textAlign: 'right',
+                      }}
+                      listItemContainerStyle={{
+                        height: 30,
+                      }}
+                      showTickIcon={false}
+                    />
+                  </View>
+                </View>
+              </ScrollView>
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <BidDoneButton onPress={onProposeBidPress} />
               </View>
-            </ScrollView>
-            <View style={{ width: '100%', alignItems: 'center' }}>
-              <BidDoneButton onPress={onProposeBidPress} />
             </View>
           </View>
         </View>
@@ -255,7 +269,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: '80%',
     height: '80%',
-    padding: 16,
   },
   modalInputContainer: {
     flexDirection: 'row',
@@ -267,6 +280,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
     marginBottom: 16,
+  },
+  biddingLoading: {
+    width: '100%',
+    height: '100%',
+    zIndex: 999,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    position: 'absolute',
+    borderRadius: 10,
+    justifyContent: 'center',
   },
 });
 

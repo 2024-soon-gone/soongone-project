@@ -5,24 +5,13 @@ import AcceptButton from './AcceptButton';
 import { Unix_timestamp } from '../../../Utils/TimeUtils';
 import api from '../../../Utils/API/Axios';
 
-const ReceivedTransRow = ({ data }) => {
+const ReceivedTransRow = ({ data, onAcceptBid }) => {
   var time = Unix_timestamp(data.bidDTO.endTime).split(' ');
   time = time[0] + '\n' + time[1];
   const bidId = data.bidId;
   const nftId = data.bidDTO.nftId;
   console.log(`bidId: ${bidId} ${nftId}`);
 
-  const onAcceptPressed = () => {
-    console.log(`제안 수락: ${nftId} ${bidId}`);
-    api
-      .post(`/trade/acceptBid/${nftId}/${bidId}`)
-      .then((res) => {
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
   return (
     <View style={styles.root}>
       <Image source={{ uri: data.imgUrl }} style={styles.image} />
@@ -33,7 +22,7 @@ const ReceivedTransRow = ({ data }) => {
       <View style={styles.tail}>
         <Text style={styles.valid}>{time}</Text>
       </View>
-      <AcceptButton onPress={onAcceptPressed} />
+      <AcceptButton onPress={() => onAcceptBid(nftId, bidId)} />
     </View>
   );
 };
