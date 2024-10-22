@@ -7,9 +7,7 @@ const ReceivedTransSeg = ({ data }) => {
     <View style={styles.root}>
       <View style={{ width: '100%', alignItems: 'center' }}>
         {isData ? (
-          data.map((trans, i) => (
-            <ReceivedTransRow data={trans} key={trans.bidDTO.nftId} />
-          ))
+          data.map((trans, i) => <ReceivedTransRow data={trans} key={i} />)
         ) : (
           <Text style={styles.empty}>아직 제안 온 거래가 없어요.</Text>
         )}

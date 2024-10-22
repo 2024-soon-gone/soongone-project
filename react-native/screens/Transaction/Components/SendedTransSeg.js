@@ -7,9 +7,7 @@ const SendedTransSeg = ({ data }) => {
   return (
     <View style={styles.root}>
       {isData ? (
-        data.map((trans, i) => (
-          <SendedTransRow data={trans} key={trans.bidDTO.nftId} />
-        ))
+        data.map((trans, i) => <SendedTransRow data={trans} key={i} />)
       ) : (
         <Text style={styles.empty}>거래를 시작해 보세요</Text>
       )}
