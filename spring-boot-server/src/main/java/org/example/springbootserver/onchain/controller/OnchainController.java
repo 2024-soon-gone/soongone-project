@@ -23,8 +23,14 @@ public class OnchainController {
     }
 
     @GetMapping("/token-balance/{address}")
-    public ResponseEntity<HttpResponseDTO<Map<String, Integer>>> getTokenBalance(@PathVariable String address) {
-        HttpResponseDTO<Map<String, Integer>> response = onchainService.getTokenBalance(address);
+    public ResponseEntity<HttpResponseDTO<Map<String, Long>>> getTokenBalance(@PathVariable String address) {
+        HttpResponseDTO<Map<String, Long>> response = onchainService.getTokenBalance(address);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
+    @GetMapping("/token-balance")
+    public ResponseEntity<HttpResponseDTO<Map<String, Long>>> getTokenBalance() {
+        HttpResponseDTO<Map<String, Long>> response = onchainService.getCurUserTokenBalance();
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 
