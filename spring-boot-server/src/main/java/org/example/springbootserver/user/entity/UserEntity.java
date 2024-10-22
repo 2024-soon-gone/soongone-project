@@ -43,6 +43,8 @@ public class UserEntity extends BaseEntity{
 
     private String walletAddress;
 
+    private String walletPrivateKey;
+
     private Date birthDay;
 
     @Enumerated(value = EnumType.STRING)

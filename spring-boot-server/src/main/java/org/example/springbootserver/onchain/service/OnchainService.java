@@ -25,6 +25,54 @@ public class OnchainService {
         this.objectMapper = new ObjectMapper();
     }
 
+    public HttpResponseDTO<Map<String, String>> getNftCount() {
+        try {
+            URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
+                    .path("/onchain/nft-count")
+                    .encode()
+                    .build()
+                    .toUri();
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
+
+            Map<String, Object> responseMap = objectMapper.readValue(responseEntity.getBody(), HashMap.class);
+            String nftCount = (String) ((Map<String, Object>) responseMap.get("data")).get("nftCount");
+
+            Map<String, String> data = new HashMap<>();
+            data.put("nftCount", nftCount);
+
+            return new HttpResponseDTO<>("success", 200, "NFT Count retrieved successfully", data, Instant.now());
+        } catch (RestClientException | JsonProcessingException e) {
+            return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
+        }
+    }
+
+    public Long getNftCountLocal() {
+        try {
+            URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
+                    .path("/onchain/nft-count")
+                    .encode()
+                    .build()
+                    .toUri();
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
+
+            Map<String, Object> responseMap = objectMapper.readValue(responseEntity.getBody(), HashMap.class);
+
+            // Retrieve nftCount as a String first
+            String nftCountString = (String) ((Map<String, Object>) responseMap.get("data")).get("nftCount");
+
+            // Convert the String to Long
+            Long nftCount = Long.valueOf(nftCountString); // Use Long.parseLong(nftCountString) if you prefer
+
+            return nftCount;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public HttpResponseDTO<Map<String, Integer>> getTokenBalance(String address) {
         try {
             URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)

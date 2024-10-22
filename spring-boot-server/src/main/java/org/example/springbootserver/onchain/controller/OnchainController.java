@@ -16,6 +16,12 @@ public class OnchainController {
 
     private final OnchainService onchainService;
 
+    @GetMapping("/nft-count")
+    public ResponseEntity<HttpResponseDTO<Map<String, String>>> getNftCount() {
+        HttpResponseDTO<Map<String, String>> response = onchainService.getNftCount();
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
+    }
+
     @GetMapping("/token-balance/{address}")
     public ResponseEntity<HttpResponseDTO<Map<String, Integer>>> getTokenBalance(@PathVariable String address) {
         HttpResponseDTO<Map<String, Integer>> response = onchainService.getTokenBalance(address);

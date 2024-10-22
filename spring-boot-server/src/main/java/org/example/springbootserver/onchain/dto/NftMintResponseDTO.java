@@ -13,4 +13,5 @@ public class NftMintResponseDTO {
     private String transactionHash;
 //    private String nftImgHash;
     private String nftImgIpfsUri;
+    private Long nftId;
 }

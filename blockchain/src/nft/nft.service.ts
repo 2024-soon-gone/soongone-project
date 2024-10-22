@@ -109,6 +109,7 @@ export class NftService {
         nftIpfsHash: jsonIpfsHash,
         transactionHash: transaction.hash, // Include transaction details
         nftImgIpfsUri: imgIpfsUri,
+        nftId: nftId,
       };
     } catch (error) {
       throw new HttpException(

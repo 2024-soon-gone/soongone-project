@@ -6,6 +6,7 @@ import {
   Body,
   Res,
   HttpStatus,
+  Response,
 } from '@nestjs/common';
 import { OnchainService } from './onchain.service';
 import { Response as ExpressResponse } from 'express';
@@ -13,6 +14,30 @@ import { Response as ExpressResponse } from 'express';
 @Controller('onchain')
 export class OnchainController {
   constructor(private readonly onchainService: OnchainService) {}
+
+  @Get('nft-count')
+  async getNFTCount(@Response() res: ExpressResponse): Promise<any> {
+    try {
+      const nftCount = await this.onchainService.getNFTCount();
+      return res.status(HttpStatus.OK).json({
+        status: 'success',
+        statusCode: HttpStatus.OK,
+        message: 'NFT Count retrieved successfully',
+        data: {
+          nftCount,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        status: 'error',
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Failed to retrieve NFT Count',
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
 
   @Get('token-balance/:address')
   async getAddressBalance(
