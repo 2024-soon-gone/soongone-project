@@ -24,12 +24,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final NftService nftService;
     private final UserService userService;
@@ -100,7 +100,6 @@ public class PostService {
     // Read all Posts
     public List<PostWithImgDTO> getAllPosts() {
         List<PostEntity> posts = postRepository.findAll();
-
         // Map each PostEntity to PostWithImgDTO
         return posts.stream().map(post -> {
             // Fetch the associated image for each post
@@ -113,6 +112,26 @@ public class PostService {
                     .nftImgIpfsUri(img.getImgUrl())
                     .build();
         }).toList();
+    }
+
+    public List<PostWithImgDTO> getUserOwnedPosts(Long userId) {
+        System.out.println("Sent user Id : " + userId);
+        List<PostEntity> posts = postRepository.findAll(); // 모든 게시물 가져오기
+
+        return posts.stream()
+                .filter(post -> post.getOwnerUserId().getId().equals(userId))
+                .map(post -> {
+                    // 게시물에 대한 이미지를 가져오기
+                    ImageEntity img = imageRepository.findByPostEntity_Id(post.getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Image not found for PostEntity_Id: " + post.getId()));
+
+                    // PostWithImgDTO 반환
+                    return PostWithImgDTO.builder()
+                            .postDTO(PostDTO.from(post)) // PostEntity를 PostDTO로 변환
+                            .nftImgIpfsUri(img.getImgUrl()) // 이미지 URL 설정
+                            .build();
+                })
+                .collect(Collectors.toList()); // 리스트로 수집하여 반환
     }
 
     // Read a Post by ID
