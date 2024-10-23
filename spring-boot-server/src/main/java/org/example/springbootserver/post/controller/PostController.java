@@ -31,6 +31,13 @@ public class PostController {
         return new ResponseEntity<>(createdPostDTO, HttpStatus.CREATED);
     }
 
+    // Get posts owned by a specific user
+    @GetMapping("/userOwned/{userId}")
+    public ResponseEntity<List<PostWithImgDTO>> getUserOwnedPosts(@PathVariable Long userId) {
+        List<PostWithImgDTO> userOwnedPosts = postService.getUserOwnedPosts(userId);
+        return new ResponseEntity<>(userOwnedPosts, HttpStatus.OK);
+    }
+
     @PostMapping("/postImage")
     public ResponseEntity<NftMintResponseDTO> postImage(@RequestPart("image") MultipartFile file) throws IOException {
 //        String nftMintResponse = postService.postImage(file);
