@@ -90,7 +90,7 @@ const Feed = ({
         </Pressable>
       </View>
       <View style={{ display: 'inline' }}>
-        <Text style={typo.bold}>{'soongone_'}</Text>
+        <Text style={typo.bold}>{accountId}</Text>
         <Text style={typo.body}>{text}</Text>
       </View>
       <Pressable>
