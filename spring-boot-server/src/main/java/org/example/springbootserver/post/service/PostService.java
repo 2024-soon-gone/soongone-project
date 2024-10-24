@@ -17,38 +17,39 @@ import org.example.springbootserver.user.entity.UserEntity;
 import org.example.springbootserver.user.exception.UserNotFoundException;
 import org.example.springbootserver.user.repository.UserRepository;
 import org.example.springbootserver.user.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final NftService nftService;
     private final UserService userService;
+
+    @Value("${spring.blockchain-server.contract.NFT_CONTRACT_ADDRESS}")
+    private String NFT_CONTRACT_ADDRESS;
 
     // Create a new Post
     public PostDTO createPost(PostRequestDTO postRequestDTO) {
         String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        String sampleNftAddress = "SAMPLE_NFT_ADDRESS";
+//        String sampleNftAddress = "SAMPLE_NFT_ADDRESS";
         Long sampleNftId = -1L;
         Long initLikes = 0L;
         Long initComments = 0L;
 
-//        UserEntity existingUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier)
-//                .orElseThrow(() -> new UserNotFoundException(sessionSocialUserIdentifier));
-
         UserEntity currentUser = userService.getCurrentUserEntity();
 
         PostEntity postEntity = PostEntity.builder()
-                .nftAddress(sampleNftAddress)
+                .nftAddress(NFT_CONTRACT_ADDRESS)
                 .nftId(sampleNftId)
                 .text(postRequestDTO.getText())
                 .genUserEntity(currentUser)
@@ -82,8 +83,14 @@ public class PostService {
         // Assuming the response is in JSON format, parse it
         ObjectMapper objectMapper = new ObjectMapper();
         NftMintResponseDTO nftMintResponseDTO = objectMapper.readValue(nftMintResponse, NftMintResponseDTO.class);
-        String nftImgIpfsUri = nftMintResponseDTO.getNftImgIpfsUri();
 
+        Long nftId = nftMintResponseDTO.getNftId();
+
+        // Update the latestPost's nftId attribute
+        latestPost.setNftId(nftId); // Assuming the method exists in PostEntity
+        postRepository.save(latestPost); // Save the updated post
+
+        String nftImgIpfsUri = nftMintResponseDTO.getNftImgIpfsUri();
         ImageEntity newImage = new ImageEntity(nftImgIpfsUri, latestPost);
         imageRepository.save(newImage);
 
@@ -93,7 +100,6 @@ public class PostService {
     // Read all Posts
     public List<PostWithImgDTO> getAllPosts() {
         List<PostEntity> posts = postRepository.findAll();
-
         // Map each PostEntity to PostWithImgDTO
         return posts.stream().map(post -> {
             // Fetch the associated image for each post
@@ -106,6 +112,26 @@ public class PostService {
                     .nftImgIpfsUri(img.getImgUrl())
                     .build();
         }).toList();
+    }
+
+    public List<PostWithImgDTO> getUserOwnedPosts(Long userId) {
+        System.out.println("Sent user Id : " + userId);
+        List<PostEntity> posts = postRepository.findAll(); // 모든 게시물 가져오기
+
+        return posts.stream()
+                .filter(post -> post.getOwnerUserId().getId().equals(userId))
+                .map(post -> {
+                    // 게시물에 대한 이미지를 가져오기
+                    ImageEntity img = imageRepository.findByPostEntity_Id(post.getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Image not found for PostEntity_Id: " + post.getId()));
+
+                    // PostWithImgDTO 반환
+                    return PostWithImgDTO.builder()
+                            .postDTO(PostDTO.from(post)) // PostEntity를 PostDTO로 변환
+                            .nftImgIpfsUri(img.getImgUrl()) // 이미지 URL 설정
+                            .build();
+                })
+                .collect(Collectors.toList()); // 리스트로 수집하여 반환
     }
 
     // Read a Post by ID
@@ -158,5 +184,7 @@ public class PostService {
         postRepository.deleteById(id);
         return "Post deleted successfully";
     }
+
+
 
 }

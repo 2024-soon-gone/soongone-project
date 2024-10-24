@@ -1,5 +1,5 @@
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
-import { AddressLike, BigNumberish, ethers } from 'ethers';
+import { AddressLike, BigNumberish, ethers, Numeric } from 'ethers';
 import { ConfigService } from 'src/config/config.service';
 import { MintDto } from '../dto/nft-dto';
 import { HttpService } from '@nestjs/axios';

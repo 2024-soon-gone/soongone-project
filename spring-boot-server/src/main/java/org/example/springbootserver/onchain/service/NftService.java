@@ -1,9 +1,12 @@
 package org.example.springbootserver.onchain.service;
 
 //import org.apache.tomcat.util.http.fileupload.IOUtils;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.example.springbootserver.onchain.constant.NftConstant;
 import org.example.springbootserver.onchain.dto.NftMintResponseDTO;
+import org.example.springbootserver.user.entity.UserEntity;
+import org.example.springbootserver.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -26,10 +29,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Service
+@RequiredArgsConstructor
 public class NftService {
 
     @Value("${spring.baseUrl.BC_SERVER_URL}")
     private String BC_SERVER_URL;
+
+    private final UserService userService;
 
     public String pingResponse() {
         URI uri =
@@ -47,6 +53,8 @@ public class NftService {
     }
 
     public String nftMintRequest(String accountAddress, String name, String description, MultipartFile file) throws IOException, RestClientException {
+
+        UserEntity currentUser = userService.getCurrentUserEntity();
         // Build the URI
         URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
                 .path("/nft/mint")
@@ -61,7 +69,8 @@ public class NftService {
 
         // Prepare the body using MultiValueMap for multipart/form-data
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("accountAddress", String.valueOf(accountAddress));
+        body.add("accountAddress", String.valueOf(currentUser.getWalletAddress()));
+        body.add("accountPrivateKey", String.valueOf(currentUser.getWalletPrivateKey()));
         body.add("name", String.valueOf(name));
         body.add("description", String.valueOf(description));
         body.add("file", createImgFile(file));

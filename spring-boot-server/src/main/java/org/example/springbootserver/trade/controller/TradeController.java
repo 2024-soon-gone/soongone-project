@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.springbootserver.global.dto.HttpResponseDTO;
 import org.example.springbootserver.onchain.dto.TransactionResponseDTO;
 import org.example.springbootserver.trade.dto.BidDTO;
+import org.example.springbootserver.trade.dto.BidRequestDTO;
+import org.example.springbootserver.trade.dto.BidResponseDTO;
 import org.example.springbootserver.trade.service.TradeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,44 +80,48 @@ public class TradeController {
     }
 
     // Activate bidding for an NFT
-    @PostMapping("/activateBidding/{collection}/{nftId}")
+    @PostMapping("/activateBidding/{nftId}")
     public ResponseEntity<HttpResponseDTO<TransactionResponseDTO>> activateBidding(
-            @PathVariable String collection,
-            @PathVariable int nftId,
-            @RequestBody String privateKey) {
-        HttpResponseDTO<TransactionResponseDTO> response = tradeService.activateBidding(collection, nftId, privateKey);
+            @PathVariable int nftId) {
+        HttpResponseDTO<TransactionResponseDTO> response = tradeService.activateBidding(nftId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // Deactivate bidding for an NFT
-    @PostMapping("/deactivateBidding/{collection}/{nftId}")
+    @PostMapping("/deactivateBidding/{nftId}")
     public ResponseEntity<HttpResponseDTO<TransactionResponseDTO>> deactivateBidding(
-            @PathVariable String collection,
-            @PathVariable int nftId,
-            @RequestBody String privateKey) {
-        HttpResponseDTO<TransactionResponseDTO> response = tradeService.deactivateBidding(collection, nftId, privateKey);
+            @PathVariable int nftId) {
+        HttpResponseDTO<TransactionResponseDTO> response = tradeService.deactivateBidding(nftId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // Create a new bid for an NFT
     @PostMapping("/bid")
-    public ResponseEntity<HttpResponseDTO<TransactionResponseDTO>> createBid(@RequestBody CreateBidRequest createBidRequest) {
+    public ResponseEntity<HttpResponseDTO<TransactionResponseDTO>> createBid(@RequestBody BidRequestDTO bidRequest) {
         // Extract the bidRequest and privateKey from the combined DTO
-        BidDTO bidRequest = createBidRequest.getBidRequest();
-        String privateKey = createBidRequest.getPrivateKey();
-
-        HttpResponseDTO<TransactionResponseDTO> response = tradeService.createBid(bidRequest, privateKey);
+        HttpResponseDTO<TransactionResponseDTO> response = tradeService.createBid(bidRequest);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     // Accept a bid for an NFT
-    @PostMapping("/acceptBid/{collection}/{nftId}/{bidId}")
+    @PostMapping("/acceptBid/{nftId}/{bidId}")
     public ResponseEntity<HttpResponseDTO<TransactionResponseDTO>> acceptBid(
-            @PathVariable String collection,
             @PathVariable int nftId,
-            @PathVariable int bidId,
-            @RequestBody String privateKey) {
-        HttpResponseDTO<TransactionResponseDTO> response = tradeService.acceptBid(collection, nftId, bidId, privateKey);
+            @PathVariable int bidId) {
+        HttpResponseDTO<TransactionResponseDTO> response = tradeService.acceptBid(nftId, bidId);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    // Get all bids for an NFT owned by Current User
+    @GetMapping("/nft-bids/received")
+    public ResponseEntity<HttpResponseDTO<Map<String, List<BidResponseDTO>>>> getAllBidsReceived() {
+        HttpResponseDTO<Map<String, List<BidResponseDTO>>> bids = tradeService.getAllBidsReceived();
+        return new ResponseEntity<>(bids, HttpStatus.OK);
+    }
+
+    @GetMapping("/nft-bids/proposed")
+    public ResponseEntity<HttpResponseDTO<Map<String, List<BidResponseDTO>>>> getAllBidsProposedByUser() {
+        HttpResponseDTO<Map<String, List<BidResponseDTO>>> bids = tradeService.getAllBidsProposedByUser();
+        return new ResponseEntity<>(bids, HttpStatus.OK);
     }
 }
