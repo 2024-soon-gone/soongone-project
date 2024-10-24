@@ -5,14 +5,38 @@ import {
   Dimensions,
   Image,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import SearchIcon from '../../assets/icon/search';
 import theme from '../../assets/Theme';
+import { useState, useEffect, useCallback } from 'react';
+import api from '../../Utils/API/Axios';
 
 const WINDOW_WIDTH = Dimensions.get('window').width;
 const IMG_WIDTH = (WINDOW_WIDTH - 8) / 3;
 
 const Search = () => {
+  const [feeds, setFeeds] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    api.get('/post').then((res) => {
+      console.log(`feeds count: ${res.data.length}`);
+      const data = res.data.sort((a, b) => b.postDTO.id - a.postDTO.id);
+      setFeeds(data);
+    });
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    api.get('/post').then((res) => {
+      console.log(`feeds count: ${res.data.length}`);
+      const data = res.data.sort((a, b) => b.postDTO.id - a.postDTO.id);
+      setFeeds(data);
+      setRefreshing(false);
+    });
+  }, []);
+
   return (
     <View style={styles.root}>
       <View style={styles.searchBar}>
@@ -23,16 +47,23 @@ const Search = () => {
           placeholderTextColor={theme.grey3}
         ></TextInput>
       </View>
-      <ScrollView style={{ flex: 1 }}>
+      <ScrollView
+        style={{ flex: 1, width: '100%' }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.result}>
-          <Image style={styles.img} backgroundColor={theme.red2}></Image>
-          <Image style={styles.img} backgroundColor={theme.red2}></Image>
-          <Image style={styles.img} backgroundColor={theme.red2}></Image>
-          <Image style={styles.img} backgroundColor={theme.red2}></Image>
-          <Image style={styles.img} backgroundColor={theme.red2}></Image>
-          <Image style={styles.img} backgroundColor={theme.red2}></Image>
-          <Image style={styles.img} backgroundColor={theme.red2}></Image>
-          <Image style={styles.img} backgroundColor={theme.red2}></Image>
+          {feeds.map((feed) => {
+            return (
+              <Image
+                style={styles.img}
+                backgroundColor={theme.red2}
+                source={{ uri: feed.nftImgIpfsUri }}
+                key={feed.postDTO.id}
+              ></Image>
+            );
+          })}
         </View>
       </ScrollView>
     </View>
