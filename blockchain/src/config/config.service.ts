@@ -2,7 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 import * as dotenv from 'dotenv';
 import * as sampleNFTJson from '../../artifacts/contracts/sampleNFTMint.sol/sampleNFT.json';
+import * as nftJSON from '../../artifacts/contracts/SGNFT.sol/SGNFT.json';
 import * as platFormTokenJSON from '../../artifacts/contracts/SoGo.sol/SoGo.json';
+import * as marketplaceJSON from '../../artifacts/contracts/MarketPlace.sol/MarketPlace.json';
 dotenv.config(); // dotenv.config({ path: '.env.local' }); In case of .env file locations in not in this current directory
 
 @Injectable()
@@ -33,7 +35,7 @@ export class ConfigService {
   }
 
   public getNFTContractABI() {
-    const abi = sampleNFTJson.abi;
+    const abi = nftJSON.abi;
     return abi;
   }
 
@@ -44,6 +46,16 @@ export class ConfigService {
 
   public getTokenContractABI() {
     const abi = platFormTokenJSON.abi;
+    return abi;
+  }
+
+  public getMarketPlaceAddress() {
+    const address = process.env.MARKET_PLACE_ADDRESS;
+    return address;
+  }
+
+  public getMarketPlaceABI() {
+    const abi = marketplaceJSON.abi;
     return abi;
   }
 

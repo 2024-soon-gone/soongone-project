@@ -26,7 +26,6 @@ public class oauth2TokenController {
 
         // Return the response body (user info) or handle error
         try {
-//            CustomOAuth2User customOAuth2User = oauth2TokenService.verifyAccessToken(provider, accessToken,response );
             oauth2TokenService.verifyAccessToken(provider, accessToken,response );
             // Call the method to process the successful verification
             return null;
