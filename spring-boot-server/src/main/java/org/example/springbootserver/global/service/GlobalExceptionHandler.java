@@ -1,4 +1,4 @@
-package org.example.springbootserver.global.exception;
+package org.example.springbootserver.global.service;
 
 import org.example.springbootserver.global.dto.ErrorResponse;
 import org.example.springbootserver.user.exception.AttributesNotAllowedToUpdateException;
@@ -11,19 +11,19 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String WRONG_USER_EXCEPTION_MESSAGE = "User does not exist";
+    private static final String WRONG_REQUEST_EXCEPTION_MESSAGE = "Wrong Request";
+    private static final String MAX_UPLOAD_SIZE_EXCEEDED_MESSAGE = "Upload size exceeded (Limit 10MB)";
+
     // Handle UserNotFoundException
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
-        // Create a custom error response
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
-        // Return the response with NOT_FOUND (404) status
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    public ResponseEntity handleUserNotFoundException(UserNotFoundException ex) {
+        return new ResponseEntity(ErrorResponse.builder().message(ex.getMessage()).build(), HttpStatus.NOT_FOUND);
     }
 
     // Handle AttributesNotAllowedToUpdateException
     @ExceptionHandler(AttributesNotAllowedToUpdateException.class)
     public ResponseEntity<ErrorResponse> handleAttributesNotAllowedToUpdateException(AttributesNotAllowedToUpdateException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(ErrorResponse.builder().message(ex.getMessage()).build(), HttpStatus.BAD_REQUEST);
     }
 }

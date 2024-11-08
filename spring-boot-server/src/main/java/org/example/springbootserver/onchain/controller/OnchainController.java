@@ -30,7 +30,7 @@ public class OnchainController {
 
     @GetMapping("/token-balance")
     public ResponseEntity<HttpResponseDTO<Map<String, Long>>> getTokenBalance() {
-        HttpResponseDTO<Map<String, Long>> response = onchainService.getCurUserTokenBalance();
+        HttpResponseDTO<Map<String, Long>> response = onchainService.getTokenBalance();
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 

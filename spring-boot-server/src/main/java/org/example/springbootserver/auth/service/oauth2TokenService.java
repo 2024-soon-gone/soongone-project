@@ -1,13 +1,12 @@
-package org.example.springbootserver.customOAuth2.service;
+package org.example.springbootserver.auth.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.example.springbootserver.customOAuth2.dto.*;
+import org.example.springbootserver.auth.dto.*;
 import org.example.springbootserver.user.entity.UserEntity;
-import org.example.springbootserver.user.exception.UserNotFoundException;
 import org.example.springbootserver.user.repository.OAuthUserRepository;
 import org.example.springbootserver.user.repository.UserRepository;
 import org.springframework.http.ResponseEntity;

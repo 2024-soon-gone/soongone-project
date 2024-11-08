@@ -3,6 +3,7 @@ package org.example.springbootserver.user.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.example.springbootserver.auth.service.UserDetailsServiceImpl;
 import org.example.springbootserver.user.dto.UserDTO;
 import org.example.springbootserver.user.dto.UserWithBalanceDTO;
 import org.example.springbootserver.user.entity.Gender;
@@ -27,10 +28,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
 
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
     @Value("${spring.baseUrl.BC_SERVER_URL}")
     private String BC_SERVER_URL;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final UserRepository userRepository;
+    private final UserDetailsServiceImpl userDetailsService;
 
     // Method to retrieve user information
     public UserDTO getUserInfo(Long id) {
@@ -39,11 +42,16 @@ public class UserService {
         return UserDTO.from(userEntity);
     }
 
-    public UserWithBalanceDTO getUserWithBalance(UserEntity userEntity) {
-        String userAddress = userEntity.getWalletAddress();
-        Long tokenBalance = this.getUserTokenBalance(userAddress); // 잔액 가져오기
-        UserDTO userDTO = UserDTO.from(userEntity); // UserEntity를 UserDTO로 변환
+    public UserWithBalanceDTO getUserWithBalance() {
+        UserEntity curUserEntity = userDetailsServiceImpl.getUserEntityByContextHolder();
+        Long tokenBalance = this.getUserTokenBalance(curUserEntity.getWalletAddress()); // 잔액 가져오기
+        UserDTO userDTO = UserDTO.from(curUserEntity); // UserEntity를 UserDTO로 변환
+        return UserWithBalanceDTO.from(userDTO, tokenBalance); // UserWithBalanceDTO 생성
+    }
 
+    public UserWithBalanceDTO getUserWithBalance(UserEntity userEntity) {
+        Long tokenBalance = this.getUserTokenBalance(userEntity.getWalletAddress()); // 잔액 가져오기
+        UserDTO userDTO = UserDTO.from(userEntity); // UserEntity를 UserDTO로 변환
         return UserWithBalanceDTO.from(userDTO, tokenBalance); // UserWithBalanceDTO 생성
     }
 
@@ -98,13 +106,5 @@ public class UserService {
         userRepository.save(existingUser);
 
         return UserDTO.from(existingUser);
-    }
-
-
-    public UserEntity getCurrentUserEntity() throws UserNotFoundException{
-        String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserEntity currentUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier)
-                .orElseThrow(() -> new UserNotFoundException(sessionSocialUserIdentifier));
-        return currentUser;
     }
 }

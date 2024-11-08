@@ -1,8 +1,8 @@
 package org.example.springbootserver.config;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.example.springbootserver.customOAuth2.service.CustomOAuth2UserService;
-import org.example.springbootserver.customOAuth2.service.CustomSuccessHandler;
+import org.example.springbootserver.auth.service.CustomOAuth2UserService;
+import org.example.springbootserver.auth.service.CustomSuccessHandler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.example.springbootserver.jwt.JWTFilter;
 import org.example.springbootserver.jwt.JWTUtil;

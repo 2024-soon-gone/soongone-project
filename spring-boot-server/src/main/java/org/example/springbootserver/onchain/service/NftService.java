@@ -3,6 +3,7 @@ package org.example.springbootserver.onchain.service;
 //import org.apache.tomcat.util.http.fileupload.IOUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
+import org.example.springbootserver.auth.service.UserDetailsServiceImpl;
 import org.example.springbootserver.onchain.constant.NftConstant;
 import org.example.springbootserver.onchain.dto.NftMintResponseDTO;
 import org.example.springbootserver.user.entity.UserEntity;
@@ -35,7 +36,7 @@ public class NftService {
     @Value("${spring.baseUrl.BC_SERVER_URL}")
     private String BC_SERVER_URL;
 
-    private final UserService userService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     public String pingResponse() {
         URI uri =
@@ -54,7 +55,7 @@ public class NftService {
 
     public String nftMintRequest(String accountAddress, String name, String description, MultipartFile file) throws IOException, RestClientException {
 
-        UserEntity currentUser = userService.getCurrentUserEntity();
+        UserEntity currentUser = userDetailsService.getUserEntityByContextHolder();
         // Build the URI
         URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
                 .path("/nft/mint")

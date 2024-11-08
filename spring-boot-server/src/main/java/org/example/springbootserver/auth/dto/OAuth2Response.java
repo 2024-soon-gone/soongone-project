@@ -1,4 +1,4 @@
-package org.example.springbootserver.customOAuth2.dto;
+package org.example.springbootserver.auth.dto;
 
 public interface OAuth2Response {
     //제공자 (Ex. naver, google, ...)

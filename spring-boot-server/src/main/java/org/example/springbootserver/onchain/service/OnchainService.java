@@ -3,6 +3,7 @@ package org.example.springbootserver.onchain.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.example.springbootserver.auth.service.UserDetailsServiceImpl;
 import org.example.springbootserver.global.dto.HttpResponseDTO;
 import org.example.springbootserver.user.entity.UserEntity;
 import org.example.springbootserver.user.service.UserService;
@@ -24,7 +25,8 @@ public class OnchainService {
     @Value("${spring.baseUrl.BC_SERVER_URL}")
     private String BC_SERVER_URL;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final UserService userService;
+    private final UserDetailsServiceImpl userDetailsService;
+
 
     public HttpResponseDTO<Map<String, String>> getNftCount() {
         try {
@@ -74,10 +76,11 @@ public class OnchainService {
         }
     }
 
-    public HttpResponseDTO<Map<String, Long>> getTokenBalance(String address) {
+    public HttpResponseDTO<Map<String, Long>> getTokenBalance() {
         try {
+            UserEntity currentUser = userDetailsService.getUserEntityByContextHolder();
             URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
-                    .path("/onchain/token-balance/" + address)
+                    .path("/onchain/token-balance/" + currentUser.getWalletAddress())
                     .encode()
                     .build()
                     .toUri();
@@ -102,13 +105,10 @@ public class OnchainService {
         }
     }
 
-    public HttpResponseDTO<Map<String, Long>> getCurUserTokenBalance() {
+    public HttpResponseDTO<Map<String, Long>> getTokenBalance(String address) {
         try {
-            UserEntity currentUser = userService.getCurrentUserEntity();
-            String userAddress = currentUser.getWalletAddress();
-
             URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
-                    .path("/onchain/token-balance/" + userAddress)
+                    .path("/onchain/token-balance/" + address)
                     .encode()
                     .build()
                     .toUri();

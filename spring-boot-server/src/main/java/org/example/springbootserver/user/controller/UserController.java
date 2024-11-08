@@ -26,8 +26,7 @@ public class UserController {
     // GET controller to retrieve user information
     @GetMapping("/myinfo")
     public ResponseEntity<UserWithBalanceDTO> getCurUserInfoWithBalance() {
-        UserEntity curUser = userService.getCurrentUserEntity();
-        UserWithBalanceDTO userWithBalanceDTO = userService.getUserWithBalance(curUser);
+        UserWithBalanceDTO userWithBalanceDTO = userService.getUserWithBalance();
         return ResponseEntity.ok(userWithBalanceDTO);
     }
 

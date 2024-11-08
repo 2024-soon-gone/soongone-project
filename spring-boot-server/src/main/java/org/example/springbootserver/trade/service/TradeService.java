@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import net.minidev.json.JSONObject;
+import org.example.springbootserver.auth.service.UserDetailsServiceImpl;
 import org.example.springbootserver.global.dto.HttpResponseDTO;
 import org.example.springbootserver.onchain.dto.TransactionResponseDTO;
 import org.example.springbootserver.onchain.service.OnchainService;
@@ -32,7 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 public class TradeService {
 
     @Value("${spring.baseUrl.BC_SERVER_URL}")
@@ -45,18 +46,11 @@ public class TradeService {
     private String TOKEN_CONTRACT_ADDRESS;
 
     private final ObjectMapper objectMapper;
-    private final UserService userService;
+    private final UserDetailsServiceImpl userDetailsService;
     private final OnchainService onchainService;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    public TradeService(UserService userService, OnchainService onchainService, PostRepository postRepository, UserRepository userRepository) {
-        this.userService = userService;
-        this.onchainService = onchainService;
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-        this.objectMapper = new ObjectMapper();
-    }
     // Get marketplace name
     public HttpResponseDTO<Map<String, String>> getMarketPlaceName() {
         try {
@@ -229,7 +223,7 @@ public class TradeService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            UserEntity currentUser = userService.getCurrentUserEntity();
+            UserEntity currentUser = userDetailsService.getUserEntityByContextHolder();
             String privateKeyDB = currentUser.getWalletPrivateKey();
             // Create a map to hold the private key
             Map<String, String> requestBody = new HashMap<>();
@@ -270,7 +264,7 @@ public class TradeService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            UserEntity currentUser = userService.getCurrentUserEntity();
+            UserEntity currentUser = userDetailsService.getUserEntityByContextHolder();
             String privateKeyDB = currentUser.getWalletPrivateKey();
             // Create a map to hold the private key
             Map<String, String> requestBody = new HashMap<>();
@@ -313,7 +307,7 @@ public class TradeService {
             System.out.println("bidRequest : " + bidRequest.toString());
 
             // Fetch current user's information
-            UserEntity currentUser = userService.getCurrentUserEntity();
+            UserEntity currentUser = userDetailsService.getUserEntityByContextHolder();
             String privateKey = currentUser.getWalletPrivateKey();
             String walletAddress = currentUser.getWalletAddress(); // Assuming you have a method to get the wallet address
 
@@ -373,7 +367,7 @@ public class TradeService {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             // Fetch current user's private key
-            UserEntity currentUser = userService.getCurrentUserEntity();
+            UserEntity currentUser = userDetailsService.getUserEntityByContextHolder();
             String privateKey = currentUser.getWalletPrivateKey();
 
             // Create request body with the private key
@@ -435,7 +429,7 @@ public class TradeService {
         System.out.printf("getAllBidsReceived activated \n");
         try {
             // Retrieve the current user
-            UserEntity currentUser = userService.getCurrentUserEntity();
+            UserEntity currentUser = userDetailsService.getUserEntityByContextHolder();
             List<PostEntity> userOwnedPosts = postRepository.findAllByOwnerUserId(currentUser);
             Set<Long> ownedNftIds = userOwnedPosts.stream()
                     .map(PostEntity::getNftId)
@@ -522,7 +516,7 @@ public class TradeService {
         System.out.printf("getAllBidsPlacedByUser activated \n");
         try {
             // Retrieve the current user's wallet address
-            UserEntity currentUser = userService.getCurrentUserEntity();
+            UserEntity currentUser = userDetailsService.getUserEntityByContextHolder();
             String userWalletAddress = currentUser.getWalletAddress();
 
             if (userWalletAddress == null || userWalletAddress.isEmpty()) {
