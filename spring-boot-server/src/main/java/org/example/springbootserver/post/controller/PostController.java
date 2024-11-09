@@ -27,7 +27,6 @@ public class PostController {
 
     private final PostService postService;
 
-    // Create a new Post
     @PostMapping("/createPost")
     public ResponseEntity<BaseResponse> createPost(@RequestBody PostRequestDTO postRequestDTO) {
         PostEntity postCreated = postService.createPost(postRequestDTO);
@@ -41,21 +40,18 @@ public class PostController {
         return ResponseEntity.ok(BaseResponse.builder().message(POST_IMG_CREATED_SUCCESS_MESSAGE).build());
     }
 
-    // Get posts owned by a specific user
     @GetMapping("/userOwned")
     public ResponseEntity<PostResponseDTO> getUserOwnedPosts() {
         List<PostWithImgDTO> userOwnedPosts = postService.getUserOwnedPosts();
         return ResponseEntity.ok(PostResponseDTO.builder().posts(userOwnedPosts).build());
     }
 
-    // Get all Posts
     @GetMapping
     public ResponseEntity<PostResponseDTO> getAllPosts() {
         List<PostWithImgDTO> allPosts = postService.getAllPosts();
         return ResponseEntity.ok(PostResponseDTO.builder().posts(allPosts).build());
     }
 
-    // Get a Post by ID
     @GetMapping("/{id}")
     public ResponseEntity<PostResponseDTO> getPostById(@PathVariable Long id) {
         PostWithImgDTO postWithImgFound = postService.getPostById(id);
@@ -64,7 +60,6 @@ public class PostController {
                 .build());
     }
 
-    // Update a Post
     @PutMapping("/{id}")
     public ResponseEntity<BaseResponse> updatePost (
             @PathVariable Long id,
@@ -73,7 +68,6 @@ public class PostController {
         return ResponseEntity.ok(BaseResponse.builder().message(POST_UPDATED_SUCCESS_MESSAGE).build());
     }
 
-    // Delete a Post
     @DeleteMapping("/{id}")
     public ResponseEntity<BaseResponse> deletePost(@PathVariable Long id) {
         postService.deletePost(id);

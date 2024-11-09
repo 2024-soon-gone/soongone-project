@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import org.example.springbootserver.global.dto.ErrorResponse;
 import org.example.springbootserver.global.dto.HttpResponseDTO;
+import org.example.springbootserver.global.dto.HttpResponseDTOv2;
 import org.example.springbootserver.user.exception.AttributesNotAllowedToUpdateException;
 import org.example.springbootserver.user.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RestClientException.class)
     public ResponseEntity<HttpResponseDTO<Object>> handleRestClientException(RestClientException e) {
-        HttpResponseDTO<Object> errorResponse = new HttpResponseDTO<>("error", 500, "External API error: " + e.getMessage(), null, Instant.now());
+        HttpResponseDTO<Object> errorResponse = new HttpResponseDTO<>("error", 500, "External API error" , e.getMessage(), Instant.now());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 

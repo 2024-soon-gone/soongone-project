@@ -7,4 +7,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class BaseResponse {
     protected String message;
+//    protected T code;
 }
