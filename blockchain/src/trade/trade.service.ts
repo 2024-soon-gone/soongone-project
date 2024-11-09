@@ -60,7 +60,7 @@ export class TradeService {
   async getNFTActive(
     addressNFTCollection: string,
     nftId: number,
-  ): Promise<string> {
+  ): Promise<boolean> {
     const nftAllowedBid = await this.marketplaceContract.getNFTActive(
       addressNFTCollection,
       nftId,

@@ -16,21 +16,18 @@ public class UserController {
 
     private final UserService userService;
 
-    // GET controller to retrieve user information
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserInfo(@PathVariable Long id) {
-        UserDTO userDTO = userService.getUserInfo(id);
-        return ResponseEntity.ok(userDTO);
+    public ResponseEntity<UserWithBalanceDTO> getUserWithBalance(@PathVariable Long id) {
+        UserWithBalanceDTO userWithBalanceDTO = userService.getUserWithBalance(id);
+        return ResponseEntity.ok(userWithBalanceDTO);
     }
 
-    // GET controller to retrieve user information
     @GetMapping("/myinfo")
     public ResponseEntity<UserWithBalanceDTO> getCurUserInfoWithBalance() {
         UserWithBalanceDTO userWithBalanceDTO = userService.getUserWithBalance();
         return ResponseEntity.ok(userWithBalanceDTO);
     }
 
-    // POST controller to update user information
     @PostMapping("/updateInfo")
     public ResponseEntity<UserDTO> updateUserInfo(@RequestBody UserDTO userDTO) {
         UserDTO updatedUserDTO = userService.updateUserInfo(userDTO);

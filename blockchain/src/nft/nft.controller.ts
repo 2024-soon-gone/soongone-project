@@ -8,13 +8,11 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFile,
-  Param,
 } from '@nestjs/common';
-
-// import { ethers } from 'ethers';
 import { NftService } from './nft.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { MintDto } from 'src/dto/nft-dto';
+import { ResponseDTO } from 'src/dto/ResponseDTO';
 
 @Controller('nft')
 export class NftController {
@@ -25,40 +23,44 @@ export class NftController {
   async uploadFile(
     @Body() mintDto: MintDto,
     @UploadedFile() file: Express.Multer.File,
-  ) {
+  ): Promise<ResponseDTO<{ txResult: any }>> {
     try {
-      return await this.nftService.mintNft(mintDto, file);
+      const txResult = await this.nftService.mintNft(mintDto, file);
+      return new ResponseDTO('NFT minted successfully', { txResult });
     } catch (error) {
       throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Error : nft/mint',
-          details: error.message,
-        },
+        new ResponseDTO('Error: nft/mint', { details: error.message }),
         HttpStatus.BAD_REQUEST,
       );
     }
   }
 
   @Get('tokenURI')
-  async getTokenURI(@Query('tokenId') tokenId: number): Promise<string> {
+  async getTokenURI(
+    @Query('tokenId') tokenId: number,
+  ): Promise<ResponseDTO<{ tokenURI: string }>> {
     try {
       const tokenURI = await this.nftService.getTokenURI(tokenId);
-      return tokenURI;
+      return new ResponseDTO(`Token URI retrieved for token ID ${tokenId}`, {
+        tokenURI,
+      });
     } catch (error) {
       throw new HttpException(
-        {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: `Failed to get tokenURI for token ${tokenId}`,
+        new ResponseDTO(`Failed to get tokenURI for token ${tokenId}`, {
           details: error.message,
-        },
+        }),
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
+
   @Get('ping')
-  responsePing(@Query('sender') sender: String): String {
-    console.log(' Block Chain Server Ping Request');
-    return 'Ping Returned and Sender caught : ' + sender;
+  async responsePing(
+    @Query('sender') sender: string,
+  ): Promise<ResponseDTO<{ message: string }>> {
+    console.log('Block Chain Server Ping Request');
+    return new ResponseDTO('Ping Returned', {
+      message: `Sent Msg: ${sender}`,
+    });
   }
 }

@@ -1,6 +1,7 @@
 package org.example.springbootserver.onchain.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootserver.auth.service.UserDetailsServiceImpl;
@@ -24,31 +25,26 @@ import java.util.Map;
 public class OnchainService {
     @Value("${spring.baseUrl.BC_SERVER_URL}")
     private String BC_SERVER_URL;
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    //private final ObjectMapper objectMapper
     private final UserDetailsServiceImpl userDetailsService;
 
-
     public HttpResponseDTO<Map<String, String>> getNftCount() {
-        try {
-            URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
-                    .path("/onchain/nft-count")
-                    .encode()
-                    .build()
-                    .toUri();
+        URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
+                .path("/onchain/nft-count")
+                .encode()
+                .build()
+                .toUri();
 
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
+        Map<String, Object> responseMap = objectMapper.readValue(responseEntity.getBody(), HashMap.class).orElseThrow((e) -> new RuntimeException());
+        String nftCount = (String) ((Map<String, Object>) responseMap.get("data")).get("nftCount");
 
-            Map<String, Object> responseMap = objectMapper.readValue(responseEntity.getBody(), HashMap.class);
-            String nftCount = (String) ((Map<String, Object>) responseMap.get("data")).get("nftCount");
+        Map<String, String> data = new HashMap<>();
+        data.put("nftCount", nftCount);
 
-            Map<String, String> data = new HashMap<>();
-            data.put("nftCount", nftCount);
-
-            return new HttpResponseDTO<>("success", 200, "NFT Count retrieved successfully", data, Instant.now());
-        } catch (RestClientException | JsonProcessingException e) {
-            return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
-        }
+        return new HttpResponseDTO<>("success", 200, "NFT Count retrieved successfully", data, Instant.now());
     }
 
     public Long getNftCountLocal() {
@@ -251,5 +247,4 @@ public class OnchainService {
             return new HttpResponseDTO<>("error", 500, e.getMessage(), null, Instant.now());
         }
     }
-
 }

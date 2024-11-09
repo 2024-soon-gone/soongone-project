@@ -1,6 +1,5 @@
 package org.example.springbootserver.onchain.service;
 
-//import org.apache.tomcat.util.http.fileupload.IOUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.example.springbootserver.auth.service.UserDetailsServiceImpl;
@@ -66,7 +65,6 @@ public class NftService {
         // Prepare headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-//        headers.setBearerAuth("your_auth_token"); // Set authorization token, adjust as needed
 
         // Prepare the body using MultiValueMap for multipart/form-data
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -92,7 +90,6 @@ public class NftService {
 
         InputStream inputStream = file.getInputStream();
         byte[] bytes = IOUtils.toByteArray(inputStream);
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         Path imgFile = Files.createTempFile("img", "." + extension);
         System.out.println("Creating and Uploading Test file : " + imgFile);
         Files.write(imgFile, bytes);

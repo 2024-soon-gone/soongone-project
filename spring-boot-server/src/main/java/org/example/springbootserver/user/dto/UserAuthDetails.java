@@ -16,7 +16,6 @@ public class UserAuthDetails implements UserDetails {
         this.userEntity = userEntity;
     }
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
