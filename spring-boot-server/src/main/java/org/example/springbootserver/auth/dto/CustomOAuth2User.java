@@ -1,4 +1,4 @@
-package org.example.springbootserver.customOAuth2.dto;
+package org.example.springbootserver.auth.dto;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;

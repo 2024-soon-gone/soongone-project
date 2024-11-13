@@ -66,7 +66,7 @@ export class OnchainService {
   }
 
   // SGNFT.sol
-  async getNFTCount(): Promise<Number> {
+  async getNFTCount(): Promise<string> {
     const nftCount = await this.nftContract._tokenIdCounter();
     return nftCount;
   }

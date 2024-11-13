@@ -4,65 +4,47 @@ import {
   Param,
   Post,
   Body,
-  Res,
   HttpStatus,
-  Response,
+  HttpException,
 } from '@nestjs/common';
 import { OnchainService } from './onchain.service';
-import { Response as ExpressResponse } from 'express';
+import { ResponseDTO } from '../dto/ResponseDTO';
 
 @Controller('onchain')
 export class OnchainController {
   constructor(private readonly onchainService: OnchainService) {}
 
   @Get('nft-count')
-  async getNFTCount(@Response() res: ExpressResponse): Promise<any> {
+  async getNFTCount(): Promise<ResponseDTO<{ nftCount: string }>> {
     try {
       const nftCount = await this.onchainService.getNFTCount();
-      return res.status(HttpStatus.OK).json({
-        status: 'success',
-        statusCode: HttpStatus.OK,
-        message: 'NFT Count retrieved successfully',
-        data: {
-          nftCount,
-        },
-        timestamp: new Date().toISOString(),
-      });
+      return new ResponseDTO('NFT Count retrieved successfully', { nftCount });
     } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        status: 'error',
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Failed to retrieve NFT Count',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      });
+      throw new HttpException(
+        new ResponseDTO('Failed to retrieve NFT Count', {
+          error: error.message,
+        }),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Get('token-balance/:address')
   async getAddressBalance(
     @Param('address') address: string,
-    @Res() res: ExpressResponse,
-  ): Promise<any> {
+  ): Promise<ResponseDTO<{ balance: string }>> {
     try {
       const balance = await this.onchainService.getAddressBalance(address);
-      return res.status(HttpStatus.OK).json({
-        status: 'success',
-        statusCode: HttpStatus.OK,
-        message: 'Address Token balance retrieved successfully',
-        data: {
-          balance,
-        },
-        timestamp: new Date().toISOString(),
+      return new ResponseDTO('Address Token balance retrieved successfully', {
+        balance,
       });
     } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        status: 'error',
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Failed to retrieve address token balance',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      });
+      throw new HttpException(
+        new ResponseDTO('Failed to retrieve address token balance', {
+          error: error.message,
+        }),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -71,158 +53,108 @@ export class OnchainController {
     @Body('addressTo') addressTo: string,
     @Body('amount') amount: number,
     @Body('privateKey') privateKey: string,
-    @Res() res: ExpressResponse,
-  ): Promise<any> {
+  ): Promise<ResponseDTO<{ txResult: any }>> {
     try {
-      const result = await this.onchainService.transfer(
+      const txResult = await this.onchainService.transfer(
         addressTo,
         amount,
         privateKey,
       );
-      return res.status(HttpStatus.OK).json({
-        status: 'success',
-        statusCode: HttpStatus.OK,
-        message: 'Transfer completed successfully',
-        data: result,
-        timestamp: new Date().toISOString(),
-      });
+      return new ResponseDTO('Transfer completed successfully', txResult);
     } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        status: 'error',
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Failed to complete transfer',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      });
+      throw new HttpException(
+        new ResponseDTO('Failed to complete transfer', {
+          error: error.message,
+        }),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Get('nft-balance/:address')
   async getAddressNFTBalance(
     @Param('address') address: string,
-    @Res() res: ExpressResponse,
-  ): Promise<any> {
+  ): Promise<ResponseDTO<{ balance: string }>> {
     try {
       const balance = await this.onchainService.getAddressNFTBalance(address);
-      return res.status(HttpStatus.OK).json({
-        status: 'success',
-        statusCode: HttpStatus.OK,
-        message: 'NFT balance retrieved successfully',
-        data: {
-          balance,
-        },
-        timestamp: new Date().toISOString(),
-      });
+      return new ResponseDTO('NFT balance retrieved successfully', { balance });
     } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        status: 'error',
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Failed to retrieve NFT balance',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      });
+      throw new HttpException(
+        new ResponseDTO('Failed to retrieve NFT balance', {
+          error: error.message,
+        }),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Get('nft-collection-name')
-  async getNftCollectionName(@Res() res: ExpressResponse): Promise<any> {
+  async getNftCollectionName(): Promise<
+    ResponseDTO<{ collectionName: string }>
+  > {
     try {
       const collectionName = await this.onchainService.getNftCollectionName();
-      return res.status(HttpStatus.OK).json({
-        status: 'success',
-        statusCode: HttpStatus.OK,
-        message: 'NFT collection name retrieved successfully',
-        data: {
-          collectionName,
-        },
-        timestamp: new Date().toISOString(),
+      return new ResponseDTO('NFT collection name retrieved successfully', {
+        collectionName,
       });
     } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        status: 'error',
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Failed to retrieve NFT collection name',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      });
+      throw new HttpException(
+        new ResponseDTO('Failed to retrieve NFT collection name', {
+          error: error.message,
+        }),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Get('nft-collection-owner')
-  async getNftCollectionOwner(@Res() res: ExpressResponse): Promise<any> {
+  async getNftCollectionOwner(): Promise<ResponseDTO<{ owner: string }>> {
     try {
       const owner = await this.onchainService.getNftCollectionOwner();
-      return res.status(HttpStatus.OK).json({
-        status: 'success',
-        statusCode: HttpStatus.OK,
-        message: 'NFT collection owner retrieved successfully',
-        data: {
-          owner,
-        },
-        timestamp: new Date().toISOString(),
+      return new ResponseDTO('NFT collection owner retrieved successfully', {
+        owner,
       });
     } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        status: 'error',
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Failed to retrieve NFT collection owner',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      });
+      throw new HttpException(
+        new ResponseDTO('Failed to retrieve NFT collection owner', {
+          error: error.message,
+        }),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Get('nft-owner/:nftId')
   async getNftOwner(
     @Param('nftId') nftId: number,
-    @Res() res: ExpressResponse,
-  ): Promise<any> {
+  ): Promise<ResponseDTO<{ owner: string }>> {
     try {
       const owner = await this.onchainService.getNftOwner(nftId);
-      return res.status(HttpStatus.OK).json({
-        status: 'success',
-        statusCode: HttpStatus.OK,
-        message: 'NFT owner retrieved successfully',
-        data: {
-          owner,
-        },
-        timestamp: new Date().toISOString(),
-      });
+      return new ResponseDTO('NFT owner retrieved successfully', { owner });
     } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        status: 'error',
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Failed to retrieve NFT owner',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      });
+      throw new HttpException(
+        new ResponseDTO('Failed to retrieve NFT owner', {
+          error: error.message,
+        }),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Get('token-uri/:nftId')
   async getTokenURI(
     @Param('nftId') nftId: number,
-    @Res() res: ExpressResponse,
-  ): Promise<any> {
+  ): Promise<ResponseDTO<{ tokenURI: string }>> {
     try {
       const tokenURI = await this.onchainService.getTokenURI(nftId);
-      return res.status(HttpStatus.OK).json({
-        status: 'success',
-        statusCode: HttpStatus.OK,
-        message: 'Token URI retrieved successfully',
-        data: {
-          tokenURI,
-        },
-        timestamp: new Date().toISOString(),
-      });
+      return new ResponseDTO('Token URI retrieved successfully', { tokenURI });
     } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        status: 'error',
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Failed to retrieve token URI',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      });
+      throw new HttpException(
+        new ResponseDTO('Failed to retrieve token URI', {
+          error: error.message,
+        }),
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

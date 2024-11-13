@@ -1,14 +1,13 @@
 package org.example.springbootserver.post.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.springbootserver.global.dto.BaseResponse;
 import org.example.springbootserver.onchain.dto.NftMintResponseDTO;
-import org.example.springbootserver.onchain.service.NftService;
-import org.example.springbootserver.post.dto.PostDTO;
 import org.example.springbootserver.post.dto.PostRequestDTO;
+import org.example.springbootserver.post.dto.PostResponseDTO;
 import org.example.springbootserver.post.dto.PostWithImgDTO;
-import org.example.springbootserver.post.exception.UserPostNotOwnedException;
+import org.example.springbootserver.post.entity.PostEntity;
 import org.example.springbootserver.post.service.PostService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,71 +20,57 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostController {
 
+    private static final String POST_CREATED_SUCCESS_MESSAGE = "Post without Img Created Successfully";
+    private static final String POST_IMG_CREATED_SUCCESS_MESSAGE = "Post Img Created Successfully";
+    private static final String POST_UPDATED_SUCCESS_MESSAGE = "Post Updated Successfully";
+    private static final String POST_DELETED_SUCCESS_MESSAGE = "Post Deleted Successfully";
+
     private final PostService postService;
-    private final NftService nftService;
 
-    // Create a new Post
     @PostMapping("/createPost")
-    public ResponseEntity<PostDTO> createPost(@RequestBody PostRequestDTO postRequestDTO) {
-        PostDTO createdPostDTO = postService.createPost(postRequestDTO);
-        return new ResponseEntity<>(createdPostDTO, HttpStatus.CREATED);
+    public ResponseEntity<BaseResponse> createPost(@RequestBody PostRequestDTO postRequestDTO) {
+        PostEntity postCreated = postService.createPost(postRequestDTO);
+        return ResponseEntity.ok(BaseResponse.builder().message(POST_CREATED_SUCCESS_MESSAGE).build());
     }
 
-    // Get posts owned by a specific user
-    @GetMapping("/userOwned/{userId}")
-    public ResponseEntity<List<PostWithImgDTO>> getUserOwnedPosts(@PathVariable Long userId) {
-        List<PostWithImgDTO> userOwnedPosts = postService.getUserOwnedPosts(userId);
-        return new ResponseEntity<>(userOwnedPosts, HttpStatus.OK);
-    }
-
+    // Mint Img as NFT
     @PostMapping("/postImage")
-    public ResponseEntity<NftMintResponseDTO> postImage(@RequestPart("image") MultipartFile file) throws IOException {
-//        String nftMintResponse = postService.postImage(file);
+    public ResponseEntity<BaseResponse> postImage(@RequestPart("image") MultipartFile file) throws IOException {
         NftMintResponseDTO nftMintResponse = postService.postImage(file);
-        return new ResponseEntity<>(nftMintResponse, HttpStatus.CREATED);
+        return ResponseEntity.ok(BaseResponse.builder().message(POST_IMG_CREATED_SUCCESS_MESSAGE).build());
     }
 
-//    @PostMapping("/ping") // Test for HttpRequest on Block Chain Server
-//    public ResponseEntity<String> ping(@RequestParam("image") MultipartFile file) throws IOException {
-//        String pingRes = nftService.pingResponse();
-//        return new ResponseEntity<>(pingRes, HttpStatus.CREATED);
-//    }
+    @GetMapping("/userOwned")
+    public ResponseEntity<PostResponseDTO> getUserOwnedPosts() {
+        List<PostWithImgDTO> userOwnedPosts = postService.getUserOwnedPosts();
+        return ResponseEntity.ok(PostResponseDTO.builder().posts(userOwnedPosts).build());
+    }
 
-    // Get all Posts
     @GetMapping
-    public ResponseEntity<List<PostWithImgDTO>> getAllPosts() {
-        List<PostWithImgDTO> posts = postService.getAllPosts();
-        return new ResponseEntity<>(posts, HttpStatus.OK);
+    public ResponseEntity<PostResponseDTO> getAllPosts() {
+        List<PostWithImgDTO> allPosts = postService.getAllPosts();
+        return ResponseEntity.ok(PostResponseDTO.builder().posts(allPosts).build());
     }
 
-    // Get a Post by ID
     @GetMapping("/{id}")
-    public ResponseEntity<PostWithImgDTO> getPostById(@PathVariable Long id) {
-        PostWithImgDTO postwWithImgFound = postService.getPostById(id);
-        return new ResponseEntity<>(postwWithImgFound, HttpStatus.OK);
+    public ResponseEntity<PostResponseDTO> getPostById(@PathVariable Long id) {
+        PostWithImgDTO postWithImgFound = postService.getPostById(id);
+        return ResponseEntity.ok(PostResponseDTO.builder()
+                .posts(List.of(postWithImgFound)) // Wrap in a list
+                .build());
     }
 
-    // Update a Post
     @PutMapping("/{id}")
-    public ResponseEntity<PostDTO> updatePost (
+    public ResponseEntity<BaseResponse> updatePost (
             @PathVariable Long id,
-            @RequestBody PostRequestDTO updatedPostRequest) throws UserPostNotOwnedException, IllegalArgumentException {
-        try {
-            PostDTO post = postService.updatePost(id, updatedPostRequest);
-            return new ResponseEntity<>(post, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+            @RequestBody PostRequestDTO updatedPostRequest) {
+        postService.updatePost(id, updatedPostRequest);
+        return ResponseEntity.ok(BaseResponse.builder().message(POST_UPDATED_SUCCESS_MESSAGE).build());
     }
 
-    // Delete a Post
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) throws UserPostNotOwnedException, IllegalArgumentException {
-        try {
-            postService.deletePost(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<BaseResponse> deletePost(@PathVariable Long id) {
+        postService.deletePost(id);
+        return ResponseEntity.ok(BaseResponse.builder().message(POST_DELETED_SUCCESS_MESSAGE).build());
     }
 }

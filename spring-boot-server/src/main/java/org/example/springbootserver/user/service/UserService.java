@@ -3,6 +3,7 @@ package org.example.springbootserver.user.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.example.springbootserver.auth.service.UserDetailsServiceImpl;
 import org.example.springbootserver.user.dto.UserDTO;
 import org.example.springbootserver.user.dto.UserWithBalanceDTO;
 import org.example.springbootserver.user.entity.Gender;
@@ -19,32 +20,41 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
     @Value("${spring.baseUrl.BC_SERVER_URL}")
     private String BC_SERVER_URL;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final UserRepository userRepository;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    // Method to retrieve user information
     public UserDTO getUserInfo(Long id) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
         return UserDTO.from(userEntity);
     }
 
-    public UserWithBalanceDTO getUserWithBalance(UserEntity userEntity) {
-        String userAddress = userEntity.getWalletAddress();
-        Long tokenBalance = this.getUserTokenBalance(userAddress); // 잔액 가져오기
-        UserDTO userDTO = UserDTO.from(userEntity); // UserEntity를 UserDTO로 변환
+    public UserWithBalanceDTO getUserWithBalance() {
+        UserEntity curUserEntity = userDetailsServiceImpl.getUserEntityByContextHolder();
+        Long tokenBalance = this.getUserTokenBalance(curUserEntity.getWalletAddress());
+        UserDTO userDTO = UserDTO.from(curUserEntity);
+        return UserWithBalanceDTO.from(userDTO, tokenBalance);
+    }
 
-        return UserWithBalanceDTO.from(userDTO, tokenBalance); // UserWithBalanceDTO 생성
+    public UserWithBalanceDTO getUserWithBalance(Long userId) {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        Long tokenBalance = this.getUserTokenBalance(userEntity.getWalletAddress());
+        UserDTO userDTO = UserDTO.from(userEntity);
+        return UserWithBalanceDTO.from(userDTO, tokenBalance);
     }
 
     public Long getUserTokenBalance(String userAddress) {
@@ -57,11 +67,8 @@ public class UserService {
 
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
-
             Map<String, Object> responseMap = objectMapper.readValue(responseEntity.getBody(), HashMap.class);
-
             String tokenBalanceString = (String) ((Map<String, Object>) responseMap.get("data")).get("balance");
-
             Long tokenBalance = Long.valueOf(tokenBalanceString);
 
             return tokenBalance;
@@ -74,19 +81,30 @@ public class UserService {
         }
     }
 
-    // Method to update user information
     public UserDTO updateUserInfo(UserDTO userDTO) {
         String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
-        // Check if any forbidden fields are being updated
-        if (userDTO.getSocialUserIdentifier() != null || userDTO.getEmail() != null ||
-                userDTO.getRole() != null || userDTO.getWalletAddress() != null) {
-            throw new AttributesNotAllowedToUpdateException();
+
+        List<String> disallowedAttributes = new ArrayList<>();
+        if (userDTO.getSocialUserIdentifier() != null) {
+            disallowedAttributes.add("socialUserIdentifier");
+        }
+        if (userDTO.getEmail() != null) {
+            disallowedAttributes.add("email");
+        }
+        if (userDTO.getRole() != null) {
+            disallowedAttributes.add("role");
+        }
+        if (userDTO.getWalletAddress() != null) {
+            disallowedAttributes.add("walletAddress");
         }
 
-        // Fetch the existing user from the repository
-        UserEntity existingUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier).orElseThrow(() -> new UserNotFoundException(sessionSocialUserIdentifier));
+        if (!disallowedAttributes.isEmpty()) {
+            String message = "Updating the following attributes is not allowed: " + String.join(", ", disallowedAttributes);
+            throw new AttributesNotAllowedToUpdateException(message);
+        }
 
-        // Update only the allowed fields
+        UserEntity existingUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier)
+                .orElseThrow(() -> new UserNotFoundException(sessionSocialUserIdentifier));
         existingUser.setAccountId(userDTO.getAccountId());
         existingUser.setName(userDTO.getName());
         existingUser.setBirthDay(userDTO.getBirthDay());
@@ -94,17 +112,9 @@ public class UserService {
         existingUser.setIntroduce(userDTO.getIntroduce());
         existingUser.setProfileImg(userDTO.getProfileImg());
 
-        // Save the updated user back to the database
         userRepository.save(existingUser);
 
         return UserDTO.from(existingUser);
     }
 
-
-    public UserEntity getCurrentUserEntity() throws UserNotFoundException{
-        String sessionSocialUserIdentifier = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserEntity currentUser = userRepository.findBySocialUserIdentifier(sessionSocialUserIdentifier)
-                .orElseThrow(() -> new UserNotFoundException(sessionSocialUserIdentifier));
-        return currentUser;
-    }
 }

@@ -1,10 +1,10 @@
-package org.example.springbootserver.customOAuth2.service;
+package org.example.springbootserver.auth.service;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.springbootserver.customOAuth2.dto.CustomOAuth2User;
+import org.example.springbootserver.auth.dto.CustomOAuth2User;
 import org.example.springbootserver.jwt.JWTUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

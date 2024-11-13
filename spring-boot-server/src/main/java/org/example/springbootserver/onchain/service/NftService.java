@@ -1,13 +1,15 @@
 package org.example.springbootserver.onchain.service;
 
-//import org.apache.tomcat.util.http.fileupload.IOUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
+import org.example.springbootserver.auth.service.UserDetailsServiceImpl;
+import org.example.springbootserver.global.dto.HttpResponseDTOv2;
 import org.example.springbootserver.onchain.constant.NftConstant;
 import org.example.springbootserver.onchain.dto.NftMintResponseDTO;
 import org.example.springbootserver.user.entity.UserEntity;
 import org.example.springbootserver.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -35,7 +37,8 @@ public class NftService {
     @Value("${spring.baseUrl.BC_SERVER_URL}")
     private String BC_SERVER_URL;
 
-    private final UserService userService;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final RestTemplate restTemplate;
 
     public String pingResponse() {
         URI uri =
@@ -52,37 +55,33 @@ public class NftService {
         return responseEntity.getBody();
     }
 
-    public String nftMintRequest(String accountAddress, String name, String description, MultipartFile file) throws IOException, RestClientException {
+    public NftMintResponseDTO nftMintRequest(String description, MultipartFile file) throws IOException, RestClientException {
 
-        UserEntity currentUser = userService.getCurrentUserEntity();
-        // Build the URI
+        UserEntity currentUser = userDetailsService.getUserEntityByContextHolder();
         URI uri = UriComponentsBuilder.fromUriString(BC_SERVER_URL)
                 .path("/nft/mint")
                 .encode()
                 .build()
                 .toUri();
 
-        // Prepare headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-//        headers.setBearerAuth("your_auth_token"); // Set authorization token, adjust as needed
 
-        // Prepare the body using MultiValueMap for multipart/form-data
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("accountAddress", String.valueOf(currentUser.getWalletAddress()));
         body.add("accountPrivateKey", String.valueOf(currentUser.getWalletPrivateKey()));
-        body.add("name", String.valueOf(name));
+        body.add("name", String.valueOf(currentUser.getName()));
         body.add("description", String.valueOf(description));
         body.add("file", createImgFile(file));
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        // Initialize RestTemplate and send the POST request
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, requestEntity, String.class);
+        ResponseEntity<HttpResponseDTOv2<NftMintResponseDTO>> response = restTemplate.exchange(
+                uri, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<>() {});
 
-        // Return the response body
-        return response.getBody();
+        System.out.println(response.getBody().getResponse().getTxResult());
+
+        return response.getBody().getResponse();
     }
 
     public static Resource createImgFile(MultipartFile file) throws IOException {
@@ -91,9 +90,8 @@ public class NftService {
 
         InputStream inputStream = file.getInputStream();
         byte[] bytes = IOUtils.toByteArray(inputStream);
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         Path imgFile = Files.createTempFile("img", "." + extension);
-        System.out.println("Creating and Uploading Test file : " + imgFile);
+        System.out.println("Creating and Uploading  File : " + imgFile);
         Files.write(imgFile, bytes);
         return new FileSystemResource(imgFile.toFile());
     }

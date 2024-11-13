@@ -1,7 +1,6 @@
-package org.example.springbootserver.customOAuth2.controller;
+package org.example.springbootserver.auth.controller;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.springbootserver.customOAuth2.dto.CustomOAuth2User;
-import org.example.springbootserver.customOAuth2.service.oauth2TokenService;
+import org.example.springbootserver.auth.service.oauth2TokenService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,7 +11,7 @@ import java.io.IOException;
 @Controller
 public class oauth2TokenController {
 
-    private final org.example.springbootserver.customOAuth2.service.oauth2TokenService oauth2TokenService;
+    private final org.example.springbootserver.auth.service.oauth2TokenService oauth2TokenService;
 
     public oauth2TokenController(oauth2TokenService oauth2TokenService) {
         this.oauth2TokenService = oauth2TokenService;

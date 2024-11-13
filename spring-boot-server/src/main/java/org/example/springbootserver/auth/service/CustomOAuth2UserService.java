@@ -1,8 +1,8 @@
-package org.example.springbootserver.customOAuth2.service;
+package org.example.springbootserver.auth.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.example.springbootserver.customOAuth2.dto.*;
+import org.example.springbootserver.auth.dto.*;
 import org.example.springbootserver.user.entity.OAuthUserEntity;
 import org.example.springbootserver.user.repository.OAuthUserRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

@@ -45,7 +45,7 @@ export class PlatformTokenService {
       await this.tokenContract
         .connect(this.adminWallet)
         .mint(mintDto.addressTo, mintDto.amount);
-      return `SoGo Token : ${mintDto.amount} minted`;
+      return `${mintDto.amount} SOGO token minted`;
     } catch (error) {
       throw new HttpException(
         `Failed to get mint in ${this.tokenContractAddress} with amount ${mintDto.amount}: ${error.message}`,

@@ -39,8 +39,6 @@ public class UserEntity extends BaseEntity{
     @NonNull
     private String role;
 
-//    private String phone;
-
     private String walletAddress;
 
     private String walletPrivateKey;
