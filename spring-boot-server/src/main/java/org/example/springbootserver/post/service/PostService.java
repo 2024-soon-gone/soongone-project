@@ -60,35 +60,28 @@ public class PostService {
     }
 
     @Transactional
-    public NftMintResponseDTO postImage(MultipartFile image) throws PostMintFailedException, JsonMappingException, IOException {
+    public NftMintResponseDTO postImage(MultipartFile image) throws PostMintFailedException, IOException {
 
         UserEntity currentUser = userDetailsService.getUserEntityByContextHolder();
 
-        // Fetch the most recent post created by the user
         PostEntity latestPost = postRepository.findTopByGenUserEntityOrderByCreatedAtDesc(currentUser)
                 .orElseThrow(() -> new IllegalArgumentException("No posts found for user: " + currentUser.getId()));
 
-        // Prepare details for NFT minting
-        String accountAddress = "0x53eFa01771483b13D10618D3865791baf84Fe97b";  // Test account set to minting user
-        String name = currentUser.getName();
         String description = latestPost.getText();  // Post's description/text
 
-        // Call NFT service to mint an NFT
-        String nftMintResponse = nftService.nftMintRequest(accountAddress, name, description, image);
+        NftMintResponseDTO  nftMintResponse = nftService.nftMintRequest(description, image);
+        NftMintResponseDTO.TxResult nftMintTxResult = nftMintResponse.getTxResult();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        NftMintResponseDTO nftMintResponseDTO = objectMapper.readValue(nftMintResponse, NftMintResponseDTO.class);
-
-        Long nftId = nftMintResponseDTO.getNftId();
+        Long nftId = nftMintTxResult.getNftId();
 
         latestPost.setNftId(nftId);
         postRepository.save(latestPost);
 
-        String nftImgIpfsUri = nftMintResponseDTO.getNftImgIpfsUri();
+        String nftImgIpfsUri = nftMintTxResult.getNftImgIpfsUri();
         ImageEntity newImage = new ImageEntity(nftImgIpfsUri, latestPost);
         imageRepository.save(newImage);
 
-        return nftMintResponseDTO;
+        return nftMintResponse;
     }
 
     // Read all Posts

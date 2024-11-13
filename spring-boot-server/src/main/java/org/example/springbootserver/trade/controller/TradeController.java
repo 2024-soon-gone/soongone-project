@@ -3,15 +3,15 @@ package org.example.springbootserver.trade.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootserver.global.dto.HttpResponseDTO;
 import org.example.springbootserver.global.dto.HttpResponseDTOv2;
-import org.example.springbootserver.onchain.dto.TransactionResponseDTO;
 import org.example.springbootserver.trade.dto.BidDTO;
 import org.example.springbootserver.trade.dto.BidRequestDTO;
 import org.example.springbootserver.trade.dto.BidResponseDTO;
 import org.example.springbootserver.trade.service.TradeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClientException;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TradeController {
 
+    private static final Logger logger = LoggerFactory.getLogger(TradeController.class);
     private final TradeService tradeService;
 
     @GetMapping("/contract-name")
@@ -39,11 +40,21 @@ public class TradeController {
     public ResponseEntity<HttpResponseDTOv2<Map<String, List<BidDTO>>>> getNFTBids(
             @PathVariable String collection,
             @PathVariable int nftId) {
+        long startTime = System.currentTimeMillis();
+        logger.info("Starting getNFTBids request for collection: {}, nftId: {}", collection, nftId);
+
         ResponseEntity<HttpResponseDTOv2<Map<String, List<BidDTO>>>> response = tradeService.getNFTBids(collection, nftId);
-        System.out.println(response.getBody());
+
+        logger.info("Received response from tradeService after {} ms", System.currentTimeMillis() - startTime);
+        logger.debug("Response body: {}", response.getBody());
+
+        long endTime = System.currentTimeMillis();
+        logger.info("Completed getNFTBids request in {} ms", endTime - startTime);
+
         return response;
     }
 
+//    @GetMapping("/nft-bids/{collection}/{nftId}")
 //    public ResponseEntity<HttpResponseDTO<Map<String, List<BidDTO>>>> getNFTBids(
 //            @PathVariable String collection,
 //            @PathVariable int nftId) {
@@ -83,14 +94,34 @@ public class TradeController {
 
     // Get all bids for an NFT owned by Current User
     @GetMapping("/nft-bids/received")
-    public ResponseEntity<HttpResponseDTO<Map<String, List<BidResponseDTO>>>> getAllBidsReceived() {
-        HttpResponseDTO<Map<String, List<BidResponseDTO>>> bids = tradeService.getAllBidsReceived();
-        return new ResponseEntity<>(bids, HttpStatus.OK);
+    public ResponseEntity<HttpResponseDTOv2<List<BidResponseDTO>>> getAllBidsReceived() {
+        List<BidResponseDTO> bids = tradeService.getAllBidsReceived();
+        HttpResponseDTOv2<List<BidResponseDTO>> response = new HttpResponseDTOv2<>(
+                "NFT bids Received retrieved successfully",
+                bids
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/nft-bids/proposed")
-    public ResponseEntity<HttpResponseDTO<Map<String, List<BidResponseDTO>>>> getAllBidsProposedByUser() {
-        HttpResponseDTO<Map<String, List<BidResponseDTO>>> bids = tradeService.getAllBidsProposedByUser();
+    public ResponseEntity<HttpResponseDTOv2<List<BidResponseDTO>>> getAllBidsProposedByUser() {
+        List<BidResponseDTO> bids = tradeService.getAllBidsProposedByUser();
+        HttpResponseDTOv2<List<BidResponseDTO>> response = new HttpResponseDTOv2<>(
+                "NFT bids Proposed retrieved successfully",
+                bids
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/nft-bids/received_deprecated")
+    public ResponseEntity<HttpResponseDTO<Map<String, List<BidResponseDTO>>>> getAllBidsReceivedDeprecated() {
+        HttpResponseDTO<Map<String, List<BidResponseDTO>>> bids = tradeService.getAllBidsReceivedDeprecated();
+        return new ResponseEntity<>(bids, HttpStatus.OK);
+    }
+
+    @GetMapping("/nft-bids/proposed_deprecated")
+    public ResponseEntity<HttpResponseDTO<Map<String, List<BidResponseDTO>>>> getAllBidsProposedByUserDeprecated() {
+        HttpResponseDTO<Map<String, List<BidResponseDTO>>> bids = tradeService.getAllBidsProposedByUserDeprecated();
         return new ResponseEntity<>(bids, HttpStatus.OK);
     }
 }
